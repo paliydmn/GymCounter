@@ -11,9 +11,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 
+import com.paliy.gymcounter_test_04.dbUtils.DBManager;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Adapter adapter;
 
     private  AdapterView.OnClickListener listener;
+    private DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setBackgroundColor(Color.CYAN);
         recyclerView.setAdapter(adapter);
 
+        dbManager = new DBManager(this);
+        try {
+            dbManager.open();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        dbManager.insert("Title", 0, "now", "some desc");
 
     }
 
