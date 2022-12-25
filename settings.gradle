@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "GymCounter_test_04"
