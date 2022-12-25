@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.widget.AdapterView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +13,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    List<String> abc;
-    List<Integer> abcImage;
+    List<String> title;
+    List<String> count;
+    //List<Integer> abcImage;
 
     Adapter adapter;
 
@@ -28,17 +28,23 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
 
-        abc = new ArrayList<>();
-        abcImage = new ArrayList<>();
+        title = new ArrayList<>();
+        count = new ArrayList<>();
+       // abcImage = new ArrayList<>();
 
 
-        abc.add("Test_1");
-        abc.add("Test_2");
-        abc.add("Test_3");
-        abc.add("Test_4");
-        abc.add("Test_5");
+        title.add("PushUp");
+        title.add("PullUp");
+        title.add("Squatting");
+        title.add("ABS");
+        title.add("Test_5");
+        count.add("90");
+        count.add("65");
+        count.add("70");
+        count.add("80");
+        count.add("80");
 
-        adapter = new Adapter(this, abc, abcImage, listener);
+        adapter = new Adapter(this, title, count, listener);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
 

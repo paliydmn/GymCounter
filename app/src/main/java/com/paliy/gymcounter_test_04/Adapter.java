@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,21 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import static android.util.Log.println;
-
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
-    List<String> abc;
-    List<Integer> abcImage;
+    List<String> title;
+    List<String> count;
+    Button Add;
+
     LayoutInflater inflater;
 
     View.OnClickListener listener;
 
-    public Adapter(Context ctx, List<String> abc, List<Integer> abcImage, View.OnClickListener listener){
+    public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener){
         this.listener = listener;
 
-        this.abc = abc;
-        this.abcImage = abcImage;
+        this.count = count;
+        this.title = title;
 
         this.inflater = LayoutInflater.from(ctx);
 
@@ -45,8 +45,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.abc.setText(abc.get(position));
-        holder.abc.setOnClickListener(listener);
+        holder.title.setText(title.get(position));
+        holder.count.setText(count.get(position));
+        holder.title.setOnClickListener(listener);
 
 //        holder.abcImage.setImageResource(abcImage.get(position));
     }
@@ -54,21 +55,23 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return abc.size();
+        return title.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView abc;
-        ImageView abcImage;
+        TextView title;
+        TextView count;
+        Button addBtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            abc = itemView.findViewById(R.id.textView);
-            abcImage = itemView.findViewById(R.id.imageView);
-
-            abcImage.setOnClickListener(this);
+            title = itemView.findViewById(R.id.tvTitle);
+            count = itemView.findViewById(R.id.tvCount);
+            //abcImage = itemView.findViewById(R.id.imageView);
+            addBtn = itemView.findViewById(R.id.btnAdd);
+            addBtn.setOnClickListener(this);
         }
 
 
@@ -85,6 +88,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             Log.println(Log.DEBUG,"TEST", String.valueOf(getAdapterPosition()));
+            int currentVal = Integer.parseInt(count.getText().toString());
+            count.setText(String.valueOf(currentVal+5));
 
         }
     }
