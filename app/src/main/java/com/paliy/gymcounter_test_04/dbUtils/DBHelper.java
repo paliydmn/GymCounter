@@ -12,19 +12,23 @@ public class DBHelper extends SQLiteOpenHelper {
     // Table columns
     public static final String _ID = "_id";
     public static final String TITLE = "title";
-    public static final String COUNT = "count";
-    public static final String DATE = "date";
+    public static final String COUNT = "counter";
+    public static final String DATE = "_date";
     public static final String DESC = "description";
 
     // Database Information
     static final String DB_NAME = "GymCounter.DB";
 
     // database version
-    static final int DB_VERSION = 1;
+    static final int DB_VERSION = 3;
 
     // Creating table query
-    private static final String CREATE_TABLE = "create table " + TABLE_NAME + "(" + _ID
-            + " INTEGER PRIMARY KEY AUTOINCREMENT, " + TITLE + " TEXT NOT NULL, "+ COUNT + " INTEGER, "+ DATE + "datetime default current_timestamp, " + DESC + " TEXT);";
+    private static final String CREATE_TABLE = "create table "
+            + TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + TITLE + " TEXT NOT NULL, "
+            + COUNT + " INTEGER, "
+            + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            + DESC + " TEXT);";
 
     public DBHelper (Context context) {
         super(context, DB_NAME, null, DB_VERSION);

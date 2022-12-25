@@ -15,6 +15,7 @@ import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        dbManager.insert("Title", 0, "now", "some desc");
+        dbManager.insert("Title for ex", 100, new Date(), "some desc");
 
     }
 

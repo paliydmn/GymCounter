@@ -5,7 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.sql.SQLData;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DBManager {
     private DBHelper dbHelper;
@@ -28,11 +31,15 @@ public class DBManager {
         dbHelper.close();
     }
 
-    public void insert(String title, int count, String date, String desc) {
+    public void insert(String title, int count, Date date, String desc) {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
         ContentValues contentValue = new ContentValues();
         contentValue.put(DBHelper.TITLE, title);
         contentValue.put(DBHelper.COUNT, count);
-        contentValue.put(DBHelper.DATE, date);
+        contentValue.put(DBHelper.DATE, dateFormat.format(date));
         contentValue.put(DBHelper.DESC, desc);
         database.insert(DBHelper.TABLE_NAME, null, contentValue);
     }
