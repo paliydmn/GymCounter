@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Map;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
@@ -26,12 +27,17 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener){
         this.listener = listener;
-
         this.count = count;
         this.title = title;
 
         this.inflater = LayoutInflater.from(ctx);
 
+    }
+
+
+    public void addItem(String title, String count){
+        this.title.add(title);
+        this.count.add(count);
     }
 
     @NonNull
@@ -69,7 +75,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
             title = itemView.findViewById(R.id.tvTitle);
             count = itemView.findViewById(R.id.tvCount);
-            //abcImage = itemView.findViewById(R.id.imageView);
             addBtn = itemView.findViewById(R.id.btnAdd);
             addBtn.setOnClickListener(this);
         }

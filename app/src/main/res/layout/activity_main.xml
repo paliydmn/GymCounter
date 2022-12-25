@@ -21,18 +21,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="25 December 2022"
-        android:textSize="36sp"
+        android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/recyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+
+        app:layout_constraintVertical_bias="0.575" />
 
     <ImageButton
         android:id="@+id/btnLeftDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="20dp"
+        android:onClick="onBeforeDate"
         app:layout_constraintEnd_toStartOf="@+id/tvDate"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,13 +43,15 @@
         app:srcCompat="@drawable/abc_vector_test" />
 
     <ImageButton
-        android:id="@+id/btnrightDate"
+        android:id="@+id/btnRightDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:layout_marginEnd="5dp"
+        android:onClick="onAfterDate"
         android:rotationY="180"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.56"
         app:layout_constraintStart_toEndOf="@+id/tvDate"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/abc_vector_test" />
