@@ -4,9 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static java.sql.DriverManager.println;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -84,11 +87,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onBeforeDate(View view){
+       Cursor cursor =  dbManager.fetch();
+
+       while (cursor.moveToNext()) {
+           Log.println(Log.DEBUG,"SELECT: ", cursor.getString(cursor.getColumnIndex("title")));
+
+           Log.println(Log.DEBUG,"SELECT: ", cursor.getString(cursor.getColumnIndex("counter")));
+           Log.println(Log.DEBUG,"SELECT: ", cursor.getString(cursor.getColumnIndex("title")));
+           Log.println(Log.DEBUG,"SELECT: ", cursor.getString(cursor.getColumnIndex("_date")));
+        }
 
     }
 
     public void onAfterDate(View view) {
         adapter.addItem("Test10", "0");
         adapter.notifyDataSetChanged();
+
+
     }
 }
