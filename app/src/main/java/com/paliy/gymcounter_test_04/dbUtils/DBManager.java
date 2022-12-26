@@ -83,7 +83,8 @@ public class DBManager {
         return true;
     }
 
-    public void delete(long _id) {
-        database.delete(DBHelper.TABLE_NAME, DBHelper._ID + "=" + _id, null);
+    public int delete(String title, Date date) {
+       return database.delete(DBHelper.TABLE_NAME, DBHelper.TITLE + " = '" + title + "' AND _date = '" + dateFormat.format(date) + "'" , null);
+
     }
 }

@@ -194,9 +194,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void getTodayData(){
 
-        //Cursor cursor =  dbManager.selectByDate(new Date());
-        //minus number would decrement the days
-
         Cursor cursor =  dbManager.selectByDate(new Date());
         if (cursor.getCount() <= 0){
             Calendar cal = Calendar.getInstance();
@@ -207,8 +204,10 @@ public class MainActivity extends AppCompatActivity {
                 initDefaultTitles();
             } else {
                 while (cursor.moveToNext()) {
-                    titleList.add(cursor.getString(cursor.getColumnIndex("title")));
+                    String titleStr = cursor.getString(cursor.getColumnIndex("title"));
+                    titleList.add(titleStr);
                     countList.add("0");
+                    dbManager.insert(titleStr, 0, new Date(), "default");
                 }
             }
         } else {
@@ -222,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.println(Log.DEBUG, "SELECT: ", cursor.getString(cursor.getColumnIndex("_date")));
             }
         }
-
+        adapter.notifyDataSetChanged();
         updateDateTv(new Date());
     }
 

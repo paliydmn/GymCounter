@@ -20,9 +20,7 @@ public class MainActivity2 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        Intent intent = new Intent("message_subject_intent");
-        intent.putExtra("name" , String.valueOf("TEST DATA FROM BROADCAST"));
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
+
 
 }
