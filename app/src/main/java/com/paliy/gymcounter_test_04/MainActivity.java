@@ -5,13 +5,18 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,11 +90,20 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new Adapter(this, titleList, countList, listener);
         intitTodaysData();
+        updateDateTv(new Date());
+        adapter.setCutterViewDate(dateOnView);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
 
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setBackgroundColor(Color.CYAN);
         recyclerView.setAdapter(adapter);
+
+/*
+//for debugging
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, -3);
+        dbManager.insert("Test-3", 100,cal.getTime(), "some desc");*/
 
     }
 
@@ -137,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         cal.setTime(dateOnView);
         cal.add(Calendar.DATE, 1);
-        // dbManager.insert("Test", 100, cal.getTime(), "some desc");
+
         cursor =  dbManager.selectByDate(cal.getTime());
         if (cursor.getCount() >= 1) {
             titleList.clear();
@@ -205,5 +219,40 @@ public class MainActivity extends AppCompatActivity {
             dbManager.insert(title, 0, new Date(), "default");
         }
     }
+
+    public void onAddNewItem(View view) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        // Get the layout inflater
+        LayoutInflater inflater = getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+
+        final View dialogView = inflater.inflate(R.layout.add_new_item_dialog,null);
+        // Pass null as the parent view because its going in the dialog layout
+        builder.setView(dialogView)
+                // Add action buttons
+                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditText newTitleEditT =dialogView.findViewById(R.id.newExeciseEditText);
+                        String newTitle = newTitleEditT.getText().toString();
+                        dbManager.insert(newTitle, 0, new Date(), "Created");
+                        titleList.add(newTitle);
+                        countList.add("0");
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                });
+        builder.create();
+        builder.show();
+
+    }
+
+
+
 
 }
