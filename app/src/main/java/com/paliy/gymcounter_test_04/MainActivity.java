@@ -92,6 +92,25 @@ public class MainActivity extends AppCompatActivity {
         cal.add(Calendar.DATE, -3);
         dbManager.insert("Test-3", 100,cal.getTime(), "some desc");*/
 
+        dateTv.setOnTouchListener(new OnSwipeTouchListener(this) {
+            public void onSwipeTop() {
+                Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeRight() {
+                Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+                onBeforeDate(dateTv);
+            }
+            public void onSwipeLeft() {
+                onAfterDate(dateTv);
+                Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
+
+            }
+            public void onSwipeBottom() {
+                Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
     }
 
     public Date getDateOnView(){
