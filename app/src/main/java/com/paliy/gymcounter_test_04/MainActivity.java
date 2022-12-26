@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;
@@ -42,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     ImageButton dateBeforeBtn;
     ImageButton dateAfterBtn;
     TextView dateTv;
+    FloatingActionButton addNewExBtn;
+
     public Date dateOnView;
 
     Adapter adapter;
@@ -57,28 +60,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
-        dateTv = findViewById(R.id.tvDate);
+        addNewExBtn = findViewById(R.id.addNewItemFABtn);
 
+        dateTv = findViewById(R.id.tvDate);
 
         titleList = new ArrayList<>();
         countList = new ArrayList<>();
-
-        // debug data
-//        titleCountMap = new ArrayMap<>();
-//        titleCountMap.put("PushUp", 200);
-//        titleCountMap.put("ABS", 140);
-//        titleCountMap.put("Squatting", 240);
-
-//        titleList.add("PushUp");
-//        titleList.add("PullUp");
-//        titleList.add("Squatting");
-//        titleList.add("ABS");
-//        titleList.add("Test_5");
-//        countList.add("90");
-//        countList.add("65");
-//        countList.add("70");
-//        countList.add("80");
-//        countList.add("0");
 
         dbManager = new DBManager(this);
         try {
@@ -126,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
             titleList.clear();
             countList.clear();
             updateDateTv(cal.getTime());
+            if(!new Date().before(dateOnView)){
+                addNewExBtn.setVisibility(View.INVISIBLE);
+            }
             while (cursor.moveToNext()) {
                 titleList.add(cursor.getString(cursor.getColumnIndex("title")));
                 countList.add(cursor.getString(cursor.getColumnIndex("counter")));
@@ -162,6 +152,11 @@ public class MainActivity extends AppCompatActivity {
                 countList.add(cursor.getString(cursor.getColumnIndex("counter")));
             }
             adapter.setCutterViewDate(dateOnView);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+            if(sdf.format(new Date()).equals(sdf.format(dateOnView))){
+                addNewExBtn.setVisibility(View.VISIBLE);
+            }
         } else {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No DATA for requested Date", Toast.LENGTH_SHORT);
@@ -221,13 +216,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAddNewItem(View view) {
-
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
         // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
-
         // Inflate and set the layout for the dialog
-
         final View dialogView = inflater.inflate(R.layout.add_new_item_dialog,null);
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
