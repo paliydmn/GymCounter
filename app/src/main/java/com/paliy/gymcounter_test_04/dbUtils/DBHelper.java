@@ -20,14 +20,15 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "GymCounter.DB";
 
     // database version
-    static final int DB_VERSION = 3;
+    static final int DB_VERSION = 7;
 
     // Creating table query
     private static final String CREATE_TABLE = "create table "
             + TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + TITLE + " TEXT NOT NULL, "
             + COUNT + " INTEGER, "
-            + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+         //   + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            + DATE + " INTEGER NOT NULL, "
             + DESC + " TEXT);";
 
     public DBHelper (Context context) {

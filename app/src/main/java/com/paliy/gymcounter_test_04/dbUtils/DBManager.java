@@ -5,13 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.sql.SQLData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
+
 
 public class DBManager {
     private DBHelper dbHelper;
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 
     private Context context;
 
@@ -33,7 +36,7 @@ public class DBManager {
 
     public void insert(String title, int count, Date date, String desc) {
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
         ContentValues contentValue = new ContentValues();
@@ -44,7 +47,7 @@ public class DBManager {
         database.insert(DBHelper.TABLE_NAME, null, contentValue);
     }
 
-    public Cursor fetch() {
+    public Cursor select() {
         String[] columns = new String[] { DBHelper._ID, DBHelper.TITLE,DBHelper.COUNT,DBHelper.DATE, DBHelper.DESC };
         Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, null, null, null, null, null);
         if (cursor != null) {
@@ -53,14 +56,31 @@ public class DBManager {
         return cursor;
     }
 
-    public int update(long _id, String title, int count, String date, String desc) {
+    public Cursor selectByDate(Date date) {
+        //SELECT * from main where _date = date('now', '-1 days');
+
+        String[] columns = new String[] { DBHelper._ID, DBHelper.TITLE,DBHelper.COUNT,DBHelper.DATE, DBHelper.DESC };
+        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s'", dateFormat.format(date)), null, null, null, null);
+        if (cursor != null) {
+           // cursor.moveToFirst();
+        }
+        return cursor;
+    }
+
+    public int updateCounter(String title, int count, Date date, String desc) {
+        //UPDATE main SET counter = (counter + 5) WHERE _date = '2022-12-25' AND title = 'PushUp' ;
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.TITLE, title);
-        contentValues.put(DBHelper.COUNT, count);
-        contentValues.put(DBHelper.DATE, date);
+        contentValues.put(DBHelper.COUNT, ("(" + DBHelper.COUNT + " + " + count + ")"));
         contentValues.put(DBHelper.DESC, desc);
-        int i = database.update(DBHelper.TABLE_NAME, contentValues, DBHelper._ID + " = " + _id, null);
+        int i = database.update(DBHelper.TABLE_NAME, contentValues, DBHelper.TITLE + " = '" + title + "' AND " + DBHelper.DATE + " = '" + dateFormat.format(date) + "'" , null);
+
         return i;
+    }
+
+    public boolean updateCounterRaw(String title, int count, Date date, String desc){
+        String strSQL = "UPDATE main SET counter = (counter + 5) WHERE _date = '" + dateFormat.format(date) + "' AND title = '"+ title + "'";
+        database.execSQL(strSQL);
+        return true;
     }
 
     public void delete(long _id) {
