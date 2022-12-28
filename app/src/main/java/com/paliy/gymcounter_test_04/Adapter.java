@@ -1,13 +1,7 @@
 package com.paliy.gymcounter_test_04;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +9,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
@@ -30,7 +22,6 @@ import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
@@ -107,41 +98,30 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             menuBtn = itemView.findViewById(R.id.menuBtn);
             cardConstrLayout = itemView.findViewById(R.id.cardConstrLayout);
 
-            cardConstrLayout.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    // TODO Auto-generated method stub
-                    onShowItemMenu(v);
-                    return true;
-                }
+            cardConstrLayout.setOnLongClickListener(v -> {
+                // TODO Auto-generated method stub
+                onShowItemMenu(v);
+                return true;
             });
 
-            menuBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onShowItemMenu(view);
+            menuBtn.setOnClickListener(this::onShowItemMenu);
+            addBtn.setOnClickListener(view -> {
+                Log.println(Log.DEBUG,"TEST", String.valueOf(getAdapterPosition()));
+                int currentVal = Integer.parseInt(count.getText().toString());
+                count.setText(String.valueOf(currentVal+5));
+
+
+                DBManager dbManager = new DBManager(addBtn.getContext());
+                try {
+                    dbManager.open();
+                    //dbManager.updateCounter((String) title.getText(),5, new Date(), " " );
+
+                    dbManager.updateCounterRaw((String) title.getText(),5, currentViewDate, " " );
+
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
                 }
-            });
-            addBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.println(Log.DEBUG,"TEST", String.valueOf(getAdapterPosition()));
-                    int currentVal = Integer.parseInt(count.getText().toString());
-                    count.setText(String.valueOf(currentVal+5));
-
-
-                    DBManager dbManager = new DBManager(addBtn.getContext());
-                    try {
-                        dbManager.open();
-                        //dbManager.updateCounter((String) title.getText(),5, new Date(), " " );
-
-                        dbManager.updateCounterRaw((String) title.getText(),5, currentViewDate, " " );
-
-                    } catch (SQLException throwable) {
-                        throwable.printStackTrace();
-                    }
-                    dbManager.close();
-                }
+                dbManager.close();
             });
         }
 
@@ -152,7 +132,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         }
 
         public void onShowItemMenu(View view){
-            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+            Dialog mDialog = new Dialog(view.getContext());
             // Get the layout inflater
             LayoutInflater inflater =  LayoutInflater.from(view.getContext());//getLayoutInflater();
             // Inflate and set the layout for the dialog
@@ -163,80 +143,45 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             Button cancelBtn = dialogView.findViewById(R.id.cancelBtn);
             EditText editTitleText = dialogView.findViewById(R.id.titleEditText);
 
-            //#ToDo implement Close Dialog
-            final AlertDialog ad = builder.show();
-            //
-            editBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    editBtn.setVisibility(View.INVISIBLE);
-                    editTitleText.setVisibility(View.VISIBLE);
-                    editApplyBtn.setVisibility(View.VISIBLE);
+            mDialog.setContentView(dialogView);
 
-                    editApplyBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
+            editBtn.setOnClickListener(view1 -> {
+                //#ToDo edit title
+                editBtn.setVisibility(View.INVISIBLE);
+                editTitleText.setVisibility(View.VISIBLE);
+                editApplyBtn.setVisibility(View.VISIBLE);
 
-                        }
-                    });
+                editApplyBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view1) {
 
-                }
-            });
-
-            deleteBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    DBManager dbManager = new DBManager(addBtn.getContext());
-                    try {
-                        dbManager.open();
-                       //#ToDo add toaster deleted and refresh list
-                       int res = dbManager.delete((String) title.getText(), currentViewDate);
-                       if(res == 1)
-                           ad.dismiss();
-
-                    } catch (SQLException throwable) {
-                        throwable.printStackTrace();
                     }
-                    dbManager.close();
-                }
+                });
             });
 
-            cancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ad.dismiss();
+            deleteBtn.setOnClickListener(view12 -> {
+                DBManager dbManager = new DBManager(addBtn.getContext());
+                try {
+                    dbManager.open();
+                   //#ToDo add toaster deleted and refresh list
+                   int res = dbManager.delete((String) title.getText(), currentViewDate);
+                   if(res == 1){
+                       Toast.makeText(view12.getContext(), title.getText() + " Deleted!", Toast.LENGTH_SHORT).show();
+                       notifyDataSetChanged();
+                   }
+
+
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
                 }
+                dbManager.close();
             });
-            //
 
-            // Pass null as the parent view because its going in the dialog layout
-            builder.setView(dialogView);
-                    // Add action buttons
-                   /* .setPositiveButton("Edit", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            EditText newTitleEditT = dialogView.findViewById(R.id.newExeciseEditText);
-                            String newTitle = newTitleEditT.getText().toString();
-                            DBManager dbManager = new DBManager(addBtn.getContext());
-                            try {
-                                dbManager.open();
-                                //dbManager.updateCounter((String) title.getText(),5, new Date(), " " );
-
-                              //  dbManager.updateCounterRaw((String) title.getText(),5, currentViewDate, " " );
-
-                            } catch (SQLException throwable) {
-                                throwable.printStackTrace();
-                            }
-                            dbManager.close();
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-
-                        }
-                    });*/
-            builder.create();
-            builder.show();
+            cancelBtn.setOnClickListener(view13 -> {
+                mDialog.cancel();
+        //        ad.dismiss();
+            });
+            mDialog.show();
         }
     }
 }

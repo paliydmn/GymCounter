@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#A3CDF6"
+    android:background="#396D6E70"
     tools:context=".MainActivity2">
 
     <androidx.cardview.widget.CardView
@@ -25,7 +25,7 @@
             android:id="@+id/cardConstrLayout"
             android:layout_width="match_parent"
             android:layout_height="153dp"
-            android:background="#04B30B">
+            android:background="#AE23B129">
 
             <TextView
                 android:id="@+id/tvTitle"

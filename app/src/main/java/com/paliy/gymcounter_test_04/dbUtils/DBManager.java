@@ -16,7 +16,7 @@ public class DBManager {
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
-    private Context context;
+    private final Context context;
 
     private SQLiteDatabase database;
 

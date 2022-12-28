@@ -1,14 +1,11 @@
 package com.paliy.gymcounter_test_04;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.Intent;
+
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -242,20 +239,15 @@ public class MainActivity extends AppCompatActivity {
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
                 // Add action buttons
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        EditText newTitleEditT =dialogView.findViewById(R.id.newExeciseEditText);
-                        String newTitle = newTitleEditT.getText().toString();
-                        dbManager.insert(newTitle, 0, new Date(), "Created");
-                        titleList.add(newTitle);
-                        countList.add("0");
-                    }
+                .setPositiveButton("Create", (dialog, id) -> {
+                    EditText newTitleEditT =dialogView.findViewById(R.id.newExeciseEditText);
+                    String newTitle = newTitleEditT.getText().toString();
+                    dbManager.insert(newTitle, 0, new Date(), "Created");
+                    titleList.add(newTitle);
+                    countList.add("0");
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                .setNegativeButton("Cancel", (dialog, id) -> {
 
-                    }
                 });
         builder.create();
         builder.show();
