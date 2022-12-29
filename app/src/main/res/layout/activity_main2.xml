@@ -4,11 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#396D6E70"
+    android:background="#000207"
     tools:context=".MainActivity2">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
+        app:cardCornerRadius="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -25,7 +26,7 @@
             android:id="@+id/cardConstrLayout"
             android:layout_width="match_parent"
             android:layout_height="153dp"
-            android:background="#AE23B129">
+            android:background="#DF1E1818">
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -34,6 +35,7 @@
                 android:layout_marginTop="5dp"
                 android:text="Title"
                 android:textSize="24sp"
+                android:textColor="#FFFFFF"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -44,19 +46,23 @@
                 android:id="@+id/btnAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="#191818"
                 android:text="Add"
+                android:textColor="#C9FFFFFF"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-                app:layout_constraintVertical_bias="0.928" />
+                app:layout_constraintVertical_bias="0.928"
+                app:rippleColor="#252222"
+                app:strokeColor="#370101" />
 
             <TextView
                 android:id="@+id/tvCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="55"
-                android:textColor="#673AB7"
+                android:textColor="#C9F1F2F4"
                 android:textSize="48sp"
                 app:layout_constraintBottom_toTopOf="@+id/btnAdd"
                 app:layout_constraintEnd_toEndOf="parent"
