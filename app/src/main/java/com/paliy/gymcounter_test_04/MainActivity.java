@@ -1,11 +1,7 @@
 package com.paliy.gymcounter_test_04;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -19,6 +15,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -46,18 +47,19 @@ public class MainActivity extends AppCompatActivity {
 
     Adapter adapter;
 
-    private  AdapterView.OnClickListener listener;
+    private AdapterView.OnClickListener listener;
     private DBManager dbManager;
 
     private static final SimpleDateFormat TITLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy");
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
@@ -72,19 +74,25 @@ public class MainActivity extends AppCompatActivity {
         dbManager = new DBManager(this);
         try {
             dbManager.open();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
-       // dbManager.insert("Title for ex", 100, new Date(), "some desc");
 
         adapter = new Adapter(this, titleList, countList, listener);
+
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+            }
+        });
+        recyclerView.setAdapter(adapter);
+
         initTodayData();
         updateDateTv(new Date());
         adapter.setCurrentViewDate(dateOnTitleTV);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(gridLayoutManager);
-        //recyclerView.setBackgroundColor(Color.CYAN);
         recyclerView.setAdapter(adapter);
 
 
@@ -95,56 +103,75 @@ public class MainActivity extends AppCompatActivity {
 
         dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
-                Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
-            }
-            public void onSwipeRight() {
-                Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
-                onBeforeDate(dateTitleTV);
-            }
-            public void onSwipeLeft() {
-                onAfterDate(dateTitleTV);
-                Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
-            }
-            public void onSwipeBottom() {
-                new DatePickerDialog(MainActivity.this,date,myCalendar.get(Calendar.YEAR),myCalendar.get(Calendar.MONTH),myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-                Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
 
-            public void myOnLongPress(){
+            public void onSwipeRight() {
+                //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+                onBeforeDate(dateTitleTV);
+            }
+
+            public void onSwipeLeft() {
+                onAfterDate(dateTitleTV);
+                // Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onSwipeBottom() {
+                new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                //  Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+            }
+
+            public void myOnLongPress() {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
                 datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                         Toast.makeText(MainActivity.this, "Long Pess " + dayOfMonth , Toast.LENGTH_SHORT).show();
+                        myCalendar.set(Calendar.YEAR, year);
+                        myCalendar.set(Calendar.MONTH, month);
+                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
+                        if (getDataForDate(myCalendar.getTime())) {
+                            dateTitleTV.setText(TITLE_DATE_FORMAT.format(myCalendar.getTime()));
+                        }
                     }
                 });
                 datePickerDialog.show();
             }
-
         });
     }
 
-    public Date getDateOnTitleTV(){
+    public Date getDateOnTitleTV() {
         return dateOnTitleTV;
     }
-    public void updateDateTv(Date date){
+
+    public void updateDateTv(Date date) {
         dateOnTitleTV = date;
         dateTitleTV.setText(TITLE_DATE_FORMAT.format(dateOnTitleTV));
     }
 
-    public void onBeforeDate(View view){
-        Calendar cal = addDayToTitleDate(dateOnTitleTV, -1);
-        Cursor cursor =  dbManager.selectByDate(cal.getTime());
+    public void onBeforeDate(View view) {
+        updateData(-1);
+    }
+
+    public void onAfterDate(View view) {
+        updateData(1);
+    }
+
+    public void updateData(int forDay) {
+        Calendar cal = addDayToTitle(dateOnTitleTV, forDay);
+        Cursor cursor = dbManager.selectByDate(cal.getTime());
         if (cursor.getCount() >= 1) {
             clearAllListData();
             updateDateTv(cal.getTime());
-            if(!new Date().before(dateOnTitleTV)){
+            if (!new Date().before(dateOnTitleTV)) {
                 addNewExBtn.setVisibility(View.INVISIBLE);
             }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            if (sdf.format(new Date()).equals(sdf.format(dateOnTitleTV))) {
+                addNewExBtn.setVisibility(View.VISIBLE);
+            }
             while (cursor.moveToNext()) {
-                titleList.add(cursor.getString(cursor.getColumnIndex("title")));
-                countList.add(cursor.getString(cursor.getColumnIndex("counter")));
+                initLists(cursor);
             }
             adapter.setCurrentViewDate(dateOnTitleTV);
         } else {
@@ -152,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
                     "No DATA for requested Date", Toast.LENGTH_SHORT);
             toast.show();
         }
-
-       adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
 
     private void clearAllListData() {
@@ -161,46 +187,26 @@ public class MainActivity extends AppCompatActivity {
         countList.clear();
     }
 
-    private static Calendar addDayToTitleDate(Date dateOnTitleTV, int i) {
+    private static Calendar addDayToTitle(Date dateOnTitleTV, int i) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(dateOnTitleTV);
         cal.add(Calendar.DATE, i);
         return cal;
     }
 
-    public void onAfterDate(View view) {
-        Calendar cal = addDayToTitleDate(dateOnTitleTV, 1);
-        Cursor cursor =  dbManager.selectByDate(cal.getTime());
-        if (cursor.getCount() >= 1) {
-            clearAllListData();
-            updateDateTv(cal.getTime());
-            while (cursor.moveToNext()) {
-                titleList.add(cursor.getString(cursor.getColumnIndex("title")));
-                countList.add(cursor.getString(cursor.getColumnIndex("counter")));
-            }
-            adapter.setCurrentViewDate(dateOnTitleTV);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-
-            if(sdf.format(new Date()).equals(sdf.format(dateOnTitleTV))){
-                addNewExBtn.setVisibility(View.VISIBLE);
-            }
-        } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No DATA for requested Date", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
-        adapter.notifyDataSetChanged();
+    public void initLists(Cursor cursor) {
+        titleList.add(cursor.getString(cursor.getColumnIndex("title")));
+        countList.add(cursor.getString(cursor.getColumnIndex("counter")));
     }
 
-    public boolean initTodayData(){
+    public boolean initTodayData() {
         setTodayData();
         adapter.notifyDataSetChanged();
         return true;
     }
 
-    public boolean getDataForDate(Date date){
-        Cursor cursor =  dbManager.selectByDate(date);
+    public boolean getDataForDate(Date date) {
+        Cursor cursor = dbManager.selectByDate(date);
         if (cursor.getCount() <= 0) {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No DATA for requested Date", Toast.LENGTH_SHORT);
@@ -211,25 +217,24 @@ public class MainActivity extends AppCompatActivity {
             updateDateTv(date);
             adapter.setCurrentViewDate(dateOnTitleTV);
             while (cursor.moveToNext()) {
-                titleList.add(cursor.getString(cursor.getColumnIndex("title")));
-                countList.add(cursor.getString(cursor.getColumnIndex("counter")));
+                initLists(cursor);
             }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-            if(!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))){
+            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
                 addNewExBtn.setVisibility(View.INVISIBLE);
             } else {
                 addNewExBtn.setVisibility(View.VISIBLE);
             }
             adapter.notifyDataSetChanged();
-           return true;
+            return true;
         }
     }
 
-    public void setTodayData(){
-        Cursor cursor =  dbManager.selectByDate(new Date());
-        if (cursor.getCount() <= 0){
-            Calendar cal = addDayToTitleDate(new Date(), -1);
-            cursor =  dbManager.selectByDate(cal.getTime());
+    public void setTodayData() {
+        Cursor cursor = dbManager.selectByDate(new Date());
+        if (cursor.getCount() <= 0) {
+            Calendar cal = addDayToTitle(new Date(), -1);
+            cursor = dbManager.selectByDate(cal.getTime());
             if (cursor.getCount() <= 0) {
                 initDefaultTitles();
             } else {
@@ -242,8 +247,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             while (cursor.moveToNext()) {
-                titleList.add(cursor.getString(cursor.getColumnIndex("title")));
-                countList.add(cursor.getString(cursor.getColumnIndex("counter")));
+                initLists(cursor);
 
                 Log.println(Log.DEBUG, "SELECT: ", cursor.getString(cursor.getColumnIndex("title")));
                 Log.println(Log.DEBUG, "SELECT: ", cursor.getString(cursor.getColumnIndex("counter")));
@@ -255,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
         updateDateTv(new Date());
     }
 
-    public void initDefaultTitles(){
+    public void initDefaultTitles() {
         titleList.addAll(Arrays.asList("PushUP", "PullUP", "ABS"));
         countList.addAll(Arrays.asList("0", "0", "0"));
         for (String title : titleList) {
@@ -265,14 +269,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void onAddNewItem(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-        // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
         // Inflate and set the layout for the dialog
-        final View dialogView = inflater.inflate(R.layout.add_new_item_dialog,null);
+        final View dialogView = inflater.inflate(R.layout.add_new_item_dialog, null);
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
                 .setPositiveButton("Create", (dialog, id) -> {
-                    EditText newTitleEditT =dialogView.findViewById(R.id.newExeciseEditText);
+                    EditText newTitleEditT = dialogView.findViewById(R.id.newExeciseEditText);
                     String newTitle = newTitleEditT.getText().toString();
                     dbManager.insert(newTitle, 0, new Date(), "Created");
                     titleList.add(newTitle);
@@ -286,17 +289,15 @@ public class MainActivity extends AppCompatActivity {
 
     DatePickerDialog.OnDateSetListener date = (view, year, month, day) -> {
         myCalendar.set(Calendar.YEAR, year);
-        myCalendar.set(Calendar.MONTH,month);
-        myCalendar.set(Calendar.DAY_OF_MONTH,day);
+        myCalendar.set(Calendar.MONTH, month);
+        myCalendar.set(Calendar.DAY_OF_MONTH, day);
         updateLabel(myCalendar.getTime());
     };
-    private void updateLabel(Date foDate){
-        if (getDataForDate(foDate)){
+
+    private void updateLabel(Date foDate) {
+        if (getDataForDate(foDate)) {
             dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
         }
     }
 
-    public void onDateTitleclick(View view) {
-        Log.println(Log.DEBUG, "TEST ", "Click on Title");
-    }
 }

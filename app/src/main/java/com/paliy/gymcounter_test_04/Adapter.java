@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
-
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -27,37 +27,24 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     List<String> title;
     List<String> count;
-    Button Add;
 
-    public Date currentViewDate;
+    Date currentViewDate;
     LayoutInflater inflater;
-
     View.OnClickListener listener;
 
-    public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener){
+    public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener) {
         this.listener = listener;
         this.count = count;
         this.title = title;
-
         this.inflater = LayoutInflater.from(ctx);
     }
 
-
-    public void addItem(String title, String count){
-        this.title.add(title);
-        this.count.add(count);
-    }
-
-    public void addItems(List<String> titles, List<String> counts){
-        this.title.addAll(titles);
-        this.count.addAll(counts);
-    }
-
-    public void setCurrentViewDate(Date date){
+    public void setCurrentViewDate(Date date) {
         currentViewDate = date;
     }
 
     View mainView;
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,9 +55,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.title.setText(title.get(position));
-        holder.count.setText(count.get(position));
-        holder.title.setOnClickListener(listener);
+        holder.titleTV.setText(title.get(position));
+        holder.countTV.setText(count.get(position));
+        holder.titleTV.setOnClickListener(listener);
+        changeAddBtnVisibility(holder);
     }
 
     @Override
@@ -78,38 +66,46 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return title.size();
     }
 
+    public void changeAddBtnVisibility(ViewHolder holder) {
+        if (!new Date().before(currentViewDate)) {
+            holder.addBtn.setVisibility(View.GONE);
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        if (sdf.format(new Date()).equals(sdf.format(currentViewDate))) {
+            holder.addBtn.setVisibility(View.VISIBLE);
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView title;
-        TextView count;
+        TextView titleTV;
+        TextView countTV;
         Button addBtn;
         ImageButton menuBtn;
         ConstraintLayout cardConstrLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            title = itemView.findViewById(R.id.tvTitle);
-            count = itemView.findViewById(R.id.tvCount);
+            titleTV = itemView.findViewById(R.id.tvTitle);
+            countTV = itemView.findViewById(R.id.tvCount);
             addBtn = itemView.findViewById(R.id.btnAdd);
             menuBtn = itemView.findViewById(R.id.menuBtn);
             cardConstrLayout = itemView.findViewById(R.id.cardConstrLayout);
 
             cardConstrLayout.setOnLongClickListener(v -> {
-                // TODO Auto-generated method stub
                 onShowItemMenu(v);
                 return true;
             });
 
             menuBtn.setOnClickListener(this::onShowItemMenu);
             addBtn.setOnClickListener(view -> {
-                Log.println(Log.DEBUG,"TEST", String.valueOf(getAdapterPosition()));
-                int currentVal = Integer.parseInt(count.getText().toString());
-                count.setText(String.valueOf(currentVal+5));
+                Log.println(Log.DEBUG, "TEST", String.valueOf(getAdapterPosition()));
+                int currentVal = Integer.parseInt(countTV.getText().toString());
+                countTV.setText(String.valueOf(currentVal + 5));
 
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                    dbManager.updateCounterRaw((String) title.getText(),5, currentViewDate, " " );
+                    dbManager.updateCounterRaw((String) titleTV.getText(), 5, currentViewDate, " ");
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
@@ -117,18 +113,17 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             });
         }
 
-
         @Override
         public void onClick(View v) {
 
         }
 
-        public void onShowItemMenu(View view){
+        public void onShowItemMenu(View view) {
             Dialog mDialog = new Dialog(view.getContext());
             // Get the layout inflater
-            LayoutInflater inflater =  LayoutInflater.from(view.getContext());//getLayoutInflater();
+            LayoutInflater inflater = LayoutInflater.from(view.getContext());
             // Inflate and set the layout for the dialog
-            final View dialogView = inflater.inflate(R.layout.card_item_menu,null);
+            final View dialogView = inflater.inflate(R.layout.card_item_menu, null);
             Button deleteBtn = dialogView.findViewById(R.id.deleteBtn);
             Button editBtn = dialogView.findViewById(R.id.editTitleBtn);
             Button editApplyBtn = dialogView.findViewById(R.id.editApplyBtn);
@@ -155,12 +150,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                   //#ToDo add toaster deleted and refresh list
-                   int res = dbManager.delete((String) title.getText(), currentViewDate);
-                   if(res == 1){
-                       Toast.makeText(view12.getContext(), title.getText() + " Deleted!", Toast.LENGTH_SHORT).show();
-                       notifyDataSetChanged();
-                   }
+                    //#ToDo add toaster deleted and refresh list
+                    int res = dbManager.delete((String) titleTV.getText(), currentViewDate);
+                    if (res == 1) {
+                        Toast.makeText(view12.getContext(), titleTV.getText() + " Deleted!", Toast.LENGTH_SHORT).show();
+                        notifyDataSetChanged();
+                    }
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
