@@ -179,7 +179,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
             cancelBtn.setOnClickListener(view13 -> {
                 mDialog.cancel();
-        //        ad.dismiss();
             });
             mDialog.show();
         }

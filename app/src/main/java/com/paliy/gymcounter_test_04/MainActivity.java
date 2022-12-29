@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 
+import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide(); //<< this
 
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
@@ -73,13 +76,14 @@ public class MainActivity extends AppCompatActivity {
        // dbManager.insert("Title for ex", 100, new Date(), "some desc");
 
         adapter = new Adapter(this, titleList, countList, listener);
-        intitTodaysData();
+        initTodaysData();
         updateDateTv(new Date());
         adapter.setCutterViewDate(dateOnView);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
 
+
         recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setBackgroundColor(Color.CYAN);
+        recyclerView.setBackgroundColor(Color.BLACK);
         recyclerView.setAdapter(adapter);
 
 /*
@@ -88,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         cal.setTime(new Date());
         cal.add(Calendar.DATE, -3);
         dbManager.insert("Test-3", 100,cal.getTime(), "some desc");*/
-
         dateTv.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
@@ -104,6 +107,18 @@ public class MainActivity extends AppCompatActivity {
             }
             public void onSwipeBottom() {
                 Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+            }
+
+            public void myOnLongPress(){
+                DatePickerDialog datePickerDialog = new DatePickerDialog(dateTv.getContext());
+                datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                         Toast.makeText(MainActivity.this, "Long Pess " + dayOfMonth , Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+                datePickerDialog.show();
             }
 
         });
@@ -182,9 +197,8 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    public boolean intitTodaysData(){
+    public boolean initTodaysData(){
         getTodayData();
-    //    adapter.addItems(titleList, countList);
         adapter.notifyDataSetChanged();
         return true;
     }

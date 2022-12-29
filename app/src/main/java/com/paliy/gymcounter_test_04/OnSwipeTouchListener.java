@@ -24,6 +24,13 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
         @Override
+        public void onLongPress(MotionEvent e) {
+            //super.onLongPress(e);
+            myOnLongPress();
+        }
+
+
+        @Override
         public boolean onDown(MotionEvent e) {
             return true;
         }
@@ -69,5 +76,8 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     }
 
     public void onSwipeBottom() {
+    }
+    public void myOnLongPress() {
+
     }
 }
