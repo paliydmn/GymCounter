@@ -35,10 +35,6 @@ public class DBManager {
     }
 
     public void insert(String title, int count, Date date, String desc) {
-
-        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-
         ContentValues contentValue = new ContentValues();
         contentValue.put(DBHelper.TITLE, title);
         contentValue.put(DBHelper.COUNT, count);
@@ -58,7 +54,6 @@ public class DBManager {
 
     public Cursor selectByDate(Date date) {
         //SELECT * from main where _date = date('now', '-1 days');
-
         String[] columns = new String[] { DBHelper._ID, DBHelper.TITLE,DBHelper.COUNT,DBHelper.DATE, DBHelper.DESC };
         Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s'", dateFormat.format(date)), null, null, null, null);
         if (cursor != null) {

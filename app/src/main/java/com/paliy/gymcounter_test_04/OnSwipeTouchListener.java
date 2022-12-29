@@ -29,7 +29,6 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
             myOnLongPress();
         }
 
-
         @Override
         public boolean onDown(MotionEvent e) {
             return true;
@@ -80,4 +79,6 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     public void myOnLongPress() {
 
     }
+
+
 }

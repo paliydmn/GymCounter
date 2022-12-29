@@ -40,7 +40,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         this.title = title;
 
         this.inflater = LayoutInflater.from(ctx);
-
     }
 
 
@@ -54,7 +53,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         this.count.addAll(counts);
     }
 
-    public void setCutterViewDate(Date date){
+    public void setCurrentViewDate(Date date){
         currentViewDate = date;
     }
 
@@ -74,15 +73,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         holder.title.setOnClickListener(listener);
     }
 
-
     @Override
     public int getItemCount() {
         return title.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-
         TextView title;
         TextView count;
         Button addBtn;
@@ -110,14 +106,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 int currentVal = Integer.parseInt(count.getText().toString());
                 count.setText(String.valueOf(currentVal+5));
 
-
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                    //dbManager.updateCounter((String) title.getText(),5, new Date(), " " );
-
                     dbManager.updateCounterRaw((String) title.getText(),5, currentViewDate, " " );
-
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
@@ -169,8 +161,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                        Toast.makeText(view12.getContext(), title.getText() + " Deleted!", Toast.LENGTH_SHORT).show();
                        notifyDataSetChanged();
                    }
-
-
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }

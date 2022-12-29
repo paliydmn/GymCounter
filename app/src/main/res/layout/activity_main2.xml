@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#000207"
+    android:background="#00FFFFFF"
     tools:context=".MainActivity2">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
-        app:cardCornerRadius="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
+        app:cardCornerRadius="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -26,7 +26,7 @@
             android:id="@+id/cardConstrLayout"
             android:layout_width="match_parent"
             android:layout_height="153dp"
-            android:background="#DF1E1818">
+            android:background="#E21D1E1D">
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -34,8 +34,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="Title"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit ="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"
+
+                android:textColor="#D1D1D1"
                 android:textSize="24sp"
-                android:textColor="#FFFFFF"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -46,23 +53,28 @@
                 android:id="@+id/btnAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#191818"
-                android:text="Add"
-                android:textColor="#C9FFFFFF"
+                android:background="#0D1B0202"
+                android:bottomLeftRadius="10dp"
+                android:bottomRightRadius="10dp"
+
+                android:text="Add 5"
+                android:textStyle="bold"
+                android:topLeftRadius="10dp"
+                android:topRightRadius="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvTitle"
                 app:layout_constraintVertical_bias="0.928"
-                app:rippleColor="#252222"
-                app:strokeColor="#370101" />
+ />
+                "/>
 
             <TextView
                 android:id="@+id/tvCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="55"
-                android:textColor="#C9F1F2F4"
+                android:textColor="#D1D1D1"
                 android:textSize="48sp"
                 app:layout_constraintBottom_toTopOf="@+id/btnAdd"
                 app:layout_constraintEnd_toEndOf="parent"
