@@ -25,8 +25,8 @@ import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
-    List<String> title;
-    List<String> count;
+    List<String> titleList;
+    List<String> countList;
 
     Date currentViewDate;
     LayoutInflater inflater;
@@ -34,8 +34,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener) {
         this.listener = listener;
-        this.count = count;
-        this.title = title;
+        this.countList = count;
+        this.titleList = title;
         this.inflater = LayoutInflater.from(ctx);
     }
 
@@ -55,15 +55,15 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.titleTV.setText(title.get(position));
-        holder.countTV.setText(count.get(position));
+        holder.titleTV.setText(titleList.get(position));
+        holder.countTV.setText(countList.get(position));
         holder.titleTV.setOnClickListener(listener);
         changeAddBtnVisibility(holder);
     }
 
     @Override
     public int getItemCount() {
-        return title.size();
+        return titleList.size();
     }
 
     public void changeAddBtnVisibility(ViewHolder holder) {
@@ -119,6 +119,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         }
 
         public void onShowItemMenu(View view) {
+            Context ctx = view.getContext();
             Dialog mDialog = new Dialog(view.getContext());
             // Get the layout inflater
             LayoutInflater inflater = LayoutInflater.from(view.getContext());
@@ -130,6 +131,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             Button cancelBtn = dialogView.findViewById(R.id.cancelBtn);
             EditText editTitleText = dialogView.findViewById(R.id.titleEditText);
 
+            String mTitleTV = (String) titleTV.getText();
+
             mDialog.setContentView(dialogView);
 
             editBtn.setOnClickListener(view1 -> {
@@ -138,23 +141,40 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 editTitleText.setVisibility(View.VISIBLE);
                 editApplyBtn.setVisibility(View.VISIBLE);
 
+                editTitleText.setText(mTitleTV);
+
                 editApplyBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view1) {
-
+                        DBManager dbManager = new DBManager(ctx);
+                        try {
+                            dbManager.open();
+                            String newString = editTitleText.getText().toString();
+                            boolean res = dbManager.updateTitleRaw((String) titleTV.getText(), newString, currentViewDate);
+                            if (res) {
+                                Toast.makeText(view1.getContext(), newString + " Edited!", Toast.LENGTH_SHORT).show();
+                                titleList.set(titleList.indexOf(mTitleTV), newString);
+                                notifyDataSetChanged();
+                                mDialog.cancel();
+                            }
+                        } catch (SQLException throwable) {
+                            throwable.printStackTrace();
+                        }
+                        dbManager.close();
                     }
                 });
             });
 
             deleteBtn.setOnClickListener(view12 -> {
-                DBManager dbManager = new DBManager(addBtn.getContext());
+                DBManager dbManager = new DBManager(ctx);
                 try {
                     dbManager.open();
-                    //#ToDo add toaster deleted and refresh list
                     int res = dbManager.delete((String) titleTV.getText(), currentViewDate);
                     if (res == 1) {
-                        Toast.makeText(view12.getContext(), titleTV.getText() + " Deleted!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
+                        titleList.remove(mTitleTV);
                         notifyDataSetChanged();
+                        mDialog.cancel();
                     }
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();

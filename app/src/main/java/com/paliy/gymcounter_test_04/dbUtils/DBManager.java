@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Editable;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -74,6 +75,11 @@ public class DBManager {
 
     public boolean updateCounterRaw(String title, int count, Date date, String desc){
         String strSQL = "UPDATE main SET counter = (counter + 5) WHERE _date = '" + dateFormat.format(date) + "' AND title = '"+ title + "'";
+        database.execSQL(strSQL);
+        return true;
+    }
+    public boolean updateTitleRaw(String oldTitle, String newTitle, Date date){
+        String strSQL = "UPDATE main SET title = '" + newTitle + "' WHERE _date = '" + dateFormat.format(date) + "' AND title = '"+ oldTitle + "'";
         database.execSQL(strSQL);
         return true;
     }
