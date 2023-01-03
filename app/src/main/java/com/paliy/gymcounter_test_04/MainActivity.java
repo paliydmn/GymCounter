@@ -175,6 +175,9 @@ public class MainActivity extends AppCompatActivity {
             }
             adapter.setCurrentViewDate(dateOnTitleTV);
         } else {
+            clearAllListData();
+            updateDateTv(cal.getTime());
+            adapter.setCurrentViewDate(dateOnTitleTV);
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No DATA for requested Date", Toast.LENGTH_SHORT);
             toast.show();
