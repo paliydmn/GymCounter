@@ -1,25 +1,44 @@
 package com.paliy.gymcounter_test_04;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;
@@ -33,6 +52,8 @@ import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    NavigationView navigationView;
 
     RecyclerView recyclerView;
     List<String> titleList;
@@ -54,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
 
+    DrawerLayout drawerLayout;
+    MainActivity activity_main;
+    Toolbar toolbar;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +90,16 @@ public class MainActivity extends AppCompatActivity {
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
+
+
+        navigationView = findViewById(R.id.navigationView);
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+
+        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams(width/2, ViewGroup.LayoutParams.MATCH_PARENT));
+                activity_main = this;
 
         dateTitleTV = findViewById(R.id.tvDate);
 
@@ -102,24 +137,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
-            public void onSwipeTop() {
-                // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
-            }
 
-            public void onSwipeRight() {
-                //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
-                onBeforeDate(dateTitleTV);
-            }
-
-            public void onSwipeLeft() {
-                onAfterDate(dateTitleTV);
-                // Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
-            }
-
-            public void onSwipeBottom() {
-                new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-                //  Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
-            }
 
             public void myOnLongPress() {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
@@ -136,6 +154,58 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 datePickerDialog.show();
+            }
+        });
+
+        recyclerView.setOnTouchListener(new OnSwipeTouchListener(this){
+            public void onSwipeTop() {
+                // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onSwipeRight() {
+                //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+//                onBeforeDate(dateTitleTV);
+                navigationView.animate()
+                        .translationX(0)
+                        .alpha(1.0f)
+                        .setDuration(300);
+                navigationView.setVisibility(View.VISIBLE);
+
+            }
+
+            public void onSwipeLeft(MotionEvent e) {
+                 //onAfterDate(dateTitleTV);
+                navigationView.setVisibility(View.INVISIBLE);
+                navigationView.animate()
+                        .translationX(-navigationView.getWidth())
+                        .alpha(0.0f)
+                        .setDuration(300);
+            }
+
+            public void onSwipeBottom() {
+                //#ToDo Refresh data
+                //new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                //  Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this){
+            public void onSwipeTop() {
+                // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onSwipeRight() {
+                //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+              onBeforeDate(dateTitleTV);
+
+            }
+
+            public void onSwipeLeft(MotionEvent e) {
+                onAfterDate(dateTitleTV);
+            }
+
+            public void onSwipeBottom() {
+                //#ToDo Refresh data
             }
         });
     }
@@ -184,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
     }
+
 
     private void clearAllListData() {
         titleList.clear();
@@ -303,4 +374,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void onOpenChartsView(View view) {
+
+
+    }
 }

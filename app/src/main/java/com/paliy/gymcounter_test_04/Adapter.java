@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,7 +77,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, NumberPicker.OnValueChangeListener {
         TextView titleTV;
         TextView countTV;
         Button addBtn;
@@ -92,7 +93,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             cardConstrLayout = itemView.findViewById(R.id.cardConstrLayout);
 
             cardConstrLayout.setOnLongClickListener(v -> {
-                onShowItemMenu(v);
+                show();
+                //onShowItemMenu(v);
                 return true;
             });
 
@@ -112,6 +114,55 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 dbManager.close();
             });
         }
+
+        public void show()
+        {
+
+            final Dialog d = new Dialog(this.countTV.getContext());
+            d.setTitle("NumberPicker");
+            d.setContentView(R.layout.num_picker_dialog);
+            Button b1 = (Button) d.findViewById(R.id.button1);
+            Button b2 = (Button) d.findViewById(R.id.button2);
+            final NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
+
+            np.setMaxValue(100);
+            np.setMinValue(0);
+            np.setWrapSelectorWheel(false);
+            np.setOnValueChangedListener(this);
+            b1.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v) {
+                    int currentCount = Integer.parseInt(countTV.getText().toString());
+                    int addToCounter = np.getValue();
+                    countTV.setText(String.valueOf(addToCounter + currentCount));
+                    DBManager dbManager = new DBManager(addBtn.getContext());
+                    try {
+                        dbManager.open();
+                        dbManager.updateCounterRaw((String) titleTV.getText(), addToCounter, currentViewDate, " ");
+                    } catch (SQLException throwable) {
+                        throwable.printStackTrace();
+                    }
+                    dbManager.close();
+                    d.dismiss();
+                }
+            });
+            b2.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v) {
+                    d.dismiss();
+                }
+            });
+            d.show();
+
+        }
+
+        @Override
+        public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+
+        }
+
 
         @Override
         public void onClick(View v) {

@@ -45,7 +45,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
                         if (diffX > 0) {
                             onSwipeRight();
                         } else {
-                            onSwipeLeft();
+                            onSwipeLeft(e1);
                         }
                         result = true;
                     }
@@ -68,7 +68,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     public void onSwipeRight() {
     }
 
-    public void onSwipeLeft() {
+    public void onSwipeLeft(MotionEvent e) {
     }
 
     public void onSwipeTop() {
