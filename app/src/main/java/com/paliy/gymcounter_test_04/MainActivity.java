@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setOnTouchListener(new OnSwipeTouchListener(this){
             public void onSwipeTop() {
-                // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+              //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
 
             public void onSwipeRight() {
@@ -172,9 +172,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onSwipeBottom() {
-                //#ToDo Refresh data
-                //new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-                //  Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                getDataForDate(dateOnTitleTV);
+                Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
             }
         });
 
