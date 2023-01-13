@@ -1,44 +1,33 @@
 package com.paliy.gymcounter_test_04;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.textfield.TextInputEditText;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;
@@ -349,9 +338,13 @@ public class MainActivity extends AppCompatActivity {
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
                 .setPositiveButton("Create", (dialog, id) -> {
-                    EditText newTitleEditT = dialogView.findViewById(R.id.newExeciseEditText);
-                    String newTitle = newTitleEditT.getText().toString();
-                    dbManager.insert(newTitle, 0, new Date(), "Created");
+                    TextInputEditText newExTitle = dialogView.findViewById(R.id.newExInpText);
+                    TextInputEditText newExDesc = dialogView.findViewById(R.id.newExeDescInpTxt);
+                    String newTitle = newExTitle.getText().toString();
+                    String newDesc = newExDesc.getText().toString();
+                    if(newDesc.isEmpty() || newDesc.equals(""))
+                        newDesc = "No Description";
+                    dbManager.insert(newTitle, 0, new Date(), newDesc );
                     titleList.add(newTitle);
                     countList.add("0");
                 })

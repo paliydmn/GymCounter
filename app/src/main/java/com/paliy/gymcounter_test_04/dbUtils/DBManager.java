@@ -53,6 +53,7 @@ public class DBManager {
         return cursor;
     }
 
+    //select * from main where _date between '2022-12-27' and  '2023-01-13' ;
     public Cursor selectByDate(Date date) {
         //SELECT * from main where _date = date('now', '-1 days');
         String[] columns = new String[] { DBHelper._ID, DBHelper.TITLE,DBHelper.COUNT,DBHelper.DATE, DBHelper.DESC };
