@@ -64,6 +64,16 @@ public class DBManager {
         return cursor;
     }
 
+    //#Todo check if that select is needed
+    public Cursor selectByTitleAndDate(Date date, String title) {
+        String[] columns = new String[] { DBHelper.DESC };
+        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s' AND title='%s'", dateFormat.format(date), title), null, null, null, null);
+        if (cursor != null) {
+           // cursor.moveToFirst();
+        }
+        return cursor;
+    }
+
     public int updateCounter(String title, int count, Date date, String desc) {
         //UPDATE main SET counter = (counter + 5) WHERE _date = '2022-12-25' AND title = 'PushUp' ;
         ContentValues contentValues = new ContentValues();
@@ -81,6 +91,11 @@ public class DBManager {
     }
     public boolean updateTitleRaw(String oldTitle, String newTitle, Date date){
         String strSQL = "UPDATE main SET title = '" + newTitle + "' WHERE _date = '" + dateFormat.format(date) + "' AND title = '"+ oldTitle + "'";
+        database.execSQL(strSQL);
+        return true;
+    }
+    public boolean updateTitleAndDescrRaw(String oldTitle, String newTitle, String newDescr, Date date){
+        String strSQL = "UPDATE main SET title = '" + newTitle + "', description = '" + newDescr + "'  WHERE _date = '" + dateFormat.format(date) + "' AND title = '"+ oldTitle + "'";
         database.execSQL(strSQL);
         return true;
     }

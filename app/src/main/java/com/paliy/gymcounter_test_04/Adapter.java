@@ -1,7 +1,11 @@
 package com.paliy.gymcounter_test_04;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.database.Cursor;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,6 +88,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         Button addBtn;
         ImageButton menuBtn;
         ConstraintLayout cardConstrLayout;
+        TextView infoTV;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -91,13 +97,13 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             addBtn = itemView.findViewById(R.id.btnAdd);
             menuBtn = itemView.findViewById(R.id.menuBtn);
             cardConstrLayout = itemView.findViewById(R.id.cardConstrLayout);
+            infoTV = itemView.findViewById(R.id.infoTV);
 
             cardConstrLayout.setOnLongClickListener(v -> {
                 show();
                 //onShowItemMenu(v);
                 return true;
             });
-
             menuBtn.setOnClickListener(this::onShowItemMenu);
             addBtn.setOnClickListener(view -> {
                 Log.println(Log.DEBUG, "TEST", String.valueOf(getAdapterPosition()));
@@ -181,18 +187,53 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             Button editApplyBtn = dialogView.findViewById(R.id.editApplyBtn);
             Button cancelBtn = dialogView.findViewById(R.id.cancelBtn);
             EditText editTitleText = dialogView.findViewById(R.id.titleEditText);
+            EditText desciptionEditText = dialogView.findViewById(R.id.desciptionEditText);
+            TextView infoTV = dialogView.findViewById(R.id.infoTV);
+            ImageView expandInfoImgV = dialogView.findViewById(R.id.expandInfoImgV);
+            infoTV.setMovementMethod(new ScrollingMovementMethod());
 
             String mTitleTV = (String) titleTV.getText();
 
+
             mDialog.setContentView(dialogView);
+
+            DBManager dbManager = new DBManager(ctx);
+            try {
+                dbManager.open();
+                Cursor cursor = dbManager.selectByTitleAndDate(currentViewDate, titleTV.getText().toString());
+                if (cursor.moveToFirst()){
+                    do{
+                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                        infoTV.setText(description);
+                    }while(cursor.moveToNext());
+                }
+                cursor.close();
+                infoTV.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (infoTV.getLineCount() > 2){
+                            expandInfoImgV.setVisibility(View.VISIBLE);
+                        }
+                        // Use lineCount here
+                    }
+                });
+
+
+            } catch (SQLException throwable) {
+                throwable.printStackTrace();
+            }
+            dbManager.close();
 
             editBtn.setOnClickListener(view1 -> {
                 //#ToDo edit title
                 editBtn.setVisibility(View.INVISIBLE);
                 editTitleText.setVisibility(View.VISIBLE);
+                desciptionEditText.setVisibility(View.VISIBLE);
+                deleteBtn.setVisibility(View.INVISIBLE);
                 editApplyBtn.setVisibility(View.VISIBLE);
 
                 editTitleText.setText(mTitleTV);
+                desciptionEditText.setText(infoTV.getText());
 
                 editApplyBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -201,7 +242,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                         try {
                             dbManager.open();
                             String newString = editTitleText.getText().toString();
-                            boolean res = dbManager.updateTitleRaw((String) titleTV.getText(), newString, currentViewDate);
+                            String newDescr = desciptionEditText.getText().toString();
+                            boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newString, newDescr, currentViewDate);
                             if (res) {
                                 Toast.makeText(view1.getContext(), newString + " Edited!", Toast.LENGTH_SHORT).show();
                                 titleList.set(titleList.indexOf(mTitleTV), newString);
@@ -217,26 +259,61 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             });
 
             deleteBtn.setOnClickListener(view12 -> {
-                DBManager dbManager = new DBManager(ctx);
-                try {
-                    dbManager.open();
-                    int res = dbManager.delete((String) titleTV.getText(), currentViewDate);
-                    if (res == 1) {
-                        Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
-                        titleList.remove(mTitleTV);
-                        notifyDataSetChanged();
-                        mDialog.cancel();
+              //  DBManager dbManager = new DBManager(ctx);
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                try {
+                                    dbManager.open();
+                                    int res = dbManager.delete((String) titleTV.getText(), currentViewDate);
+                                    if (res == 1) {
+                                        Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
+                                        titleList.remove(mTitleTV);
+                                        notifyDataSetChanged();
+                                        mDialog.cancel();
+                                    }
+                                } catch (SQLException throwable) {
+                                    throwable.printStackTrace();
+                                }
+                                dbManager.close();
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
                     }
-                } catch (SQLException throwable) {
-                    throwable.printStackTrace();
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(view12.getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+            });
+
+            expandInfoImgV.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (infoTV.getMaxLines() == 2)
+                    {
+                        infoTV.setMaxLines(10);
+                        expandInfoImgV.setRotationX(180);
+                    }
+                    else
+                    {
+                        infoTV.setMaxLines(2);
+                        expandInfoImgV.setRotationX(0);
+                    }
                 }
-                dbManager.close();
             });
 
             cancelBtn.setOnClickListener(view13 -> {
                 mDialog.cancel();
             });
             mDialog.show();
+
         }
     }
 }

@@ -97,7 +97,7 @@
                 app:srcCompat="@drawable/ic_action_menu_white_dots" />
 
             <TextView
-                android:id="@+id/infoTv"
+                android:id="@+id/infoTV_Image"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginTop="90dp"

@@ -3,6 +3,7 @@ package com.paliy.gymcounter_test_04;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -25,6 +26,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -78,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
+       //
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
-
 
         navigationView = findViewById(R.id.navigationView);
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -122,10 +125,9 @@ public class MainActivity extends AppCompatActivity {
 
         dateTitleTV.setOnClickListener(view -> {
             new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
         });
 
-        dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
+/*        dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
 
 
             public void myOnLongPress() {
@@ -144,13 +146,21 @@ public class MainActivity extends AppCompatActivity {
                 });
                 datePickerDialog.show();
             }
-        });
+        });*/
 
         recyclerView.setOnTouchListener(new OnSwipeTouchListener(this){
             public void onSwipeTop() {
               //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
-
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                navigationView.setVisibility(View.INVISIBLE);
+                navigationView.animate()
+                        .translationX(-navigationView.getWidth())
+                        .alpha(0.0f)
+                        .setDuration(300);
+                return super.onTouch(v, event);
+            }
             public void onSwipeRight() {
                 //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
 //                onBeforeDate(dateTitleTV);
@@ -172,8 +182,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onSwipeBottom() {
-                getDataForDate(dateOnTitleTV);
+                // ToDo
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateOnTitleTV);
+                updateDataForDate(cal);
+                //getDataForDate(dateOnTitleTV);
                 Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -195,6 +210,22 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeBottom() {
                 //#ToDo Refresh data
             }
+        public void myOnLongPress() {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
+            datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                    myCalendar.set(Calendar.YEAR, year);
+                    myCalendar.set(Calendar.MONTH, month);
+                    myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    updateData(myCalendar.getTime());
+//                    if (getDataForDate(myCalendar.getTime())) {
+//                        dateTitleTV.setText(TITLE_DATE_FORMAT.format(myCalendar.getTime()));
+//                    }
+                }
+            });
+            datePickerDialog.show();        }
         });
     }
 
@@ -217,17 +248,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateData(int forDay) {
         Calendar cal = addDayToTitle(dateOnTitleTV, forDay);
+        updateDataForDate(cal);
+    }
+
+    public void updateData(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        updateDataForDate(cal);
+    }
+
+    private void updateDataForDate(Calendar cal) {
         Cursor cursor = dbManager.selectByDate(cal.getTime());
         if (cursor.getCount() >= 1) {
             clearAllListData();
             updateDateTv(cal.getTime());
-            if (!new Date().before(dateOnTitleTV)) {
-                addNewExBtn.setVisibility(View.INVISIBLE);
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-            if (sdf.format(new Date()).equals(sdf.format(dateOnTitleTV))) {
-                addNewExBtn.setVisibility(View.VISIBLE);
-            }
             while (cursor.moveToNext()) {
                 initLists(cursor);
             }
@@ -237,12 +271,19 @@ public class MainActivity extends AppCompatActivity {
             updateDateTv(cal.getTime());
             adapter.setCurrentViewDate(dateOnTitleTV);
             Toast toast = Toast.makeText(getApplicationContext(),
-                    "No DATA for requested Date", Toast.LENGTH_SHORT);
+                    "No DATA for " + dateTitleTV.getText(), Toast.LENGTH_SHORT);
             toast.show();
+        }
+
+        Calendar cal_new = Calendar.getInstance();
+        cal_new.setTime(TODAY);
+        if (cal_new.get(Calendar.DAY_OF_YEAR) != cal.get(Calendar.DAY_OF_YEAR)){
+            addNewExBtn.setVisibility(View.INVISIBLE);
+        } else {
+            addNewExBtn.setVisibility(View.VISIBLE);
         }
         adapter.notifyDataSetChanged();
     }
-
 
     private void clearAllListData() {
         titleList.clear();
@@ -267,30 +308,31 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean getDataForDate(Date date) {
-        Cursor cursor = dbManager.selectByDate(date);
-        if (cursor.getCount() <= 0) {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No DATA for requested Date", Toast.LENGTH_SHORT);
-            toast.show();
-            return false;
-        } else {
-            clearAllListData();
-            updateDateTv(date);
-            adapter.setCurrentViewDate(dateOnTitleTV);
-            while (cursor.moveToNext()) {
-                initLists(cursor);
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
-                addNewExBtn.setVisibility(View.INVISIBLE);
-            } else {
-                addNewExBtn.setVisibility(View.VISIBLE);
-            }
-            adapter.notifyDataSetChanged();
-            return true;
-        }
-    }
+//    public boolean getDataForDate(Date date) {
+//        Cursor cursor = dbManager.selectByDate(date);
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//
+//        if (cursor.getCount() <= 0) {
+//            Toast toast = Toast.makeText(getApplicationContext(),
+//                    "No DATA for " + TITLE_DATE_FORMAT.format(date), Toast.LENGTH_SHORT);
+//            toast.show();
+//            return false;
+//        } else {
+//            clearAllListData();
+//            updateDateTv(date);
+//            adapter.setCurrentViewDate(dateOnTitleTV);
+//            while (cursor.moveToNext()) {
+//                initLists(cursor);
+//            }
+//            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
+//                addNewExBtn.setVisibility(View.INVISIBLE);
+//            } else {
+//                addNewExBtn.setVisibility(View.VISIBLE);
+//            }
+//            adapter.notifyDataSetChanged();
+//            return true;
+//        }
+//    }
 
     public void setTodayData() {
         Cursor cursor = dbManager.selectByDate(new Date());
@@ -353,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    DatePickerDialog.OnDateSetListener date = (view, year, month, day) -> {
+    final DatePickerDialog.OnDateSetListener date = (view, year, month, day) -> {
         myCalendar.set(Calendar.YEAR, year);
         myCalendar.set(Calendar.MONTH, month);
         myCalendar.set(Calendar.DAY_OF_MONTH, day);
@@ -361,13 +403,15 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void updateLabel(Date foDate) {
-        if (getDataForDate(foDate)) {
+        //if (getDataForDate(foDate)) {
             dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
-        }
+        //}
     }
 
     public void onOpenChartsView(View view) {
-
+        Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);
+        ChartsActivityIntent.putExtra("key", "Charts"); //Optional parameters
+        MainActivity.this.startActivity(ChartsActivityIntent);
 
     }
 }
