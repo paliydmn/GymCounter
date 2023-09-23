@@ -16,27 +16,50 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.ArrayMap;
 import android.view.View;
 import android.widget.Button;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class ChartsActivity extends AppCompatActivity {
+
+    private String ChartTitle = "";
+    private Statistic stat;
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
-        String value = intent.getStringExtra("key");
+        String cal = intent.getStringExtra("dateRange");
 
+        Calendar calendar = Calendar.getInstance();
+
+        try {
+            calendar.setTime(dateFormat.parse(cal));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         setContentView(R.layout.activity_charts);
 
-        Button test = (Button) findViewById(R.id.testBtn);
+        int lastMonthDay =  getLastDayOfMonthUsingCalendar(calendar.get(Calendar.MONTH));
+        Date end = new Date(123, calendar.get(Calendar.MONTH), lastMonthDay);
+        Date start = new Date(123, calendar.get(Calendar.MONTH), 1);
+        stat = new Statistic(this, start,end);
+        ChartTitle = stat.getDateRange();
+        //System.out.println();
         BarChart chart = (BarChart) findViewById(R.id.chart);
 
         Description description = new Description();
-        description.setText("Test Chart");
+        description.setText(ChartTitle);
 
         BarData data = new BarData(getDataSet());
         //BarData data = new BarData(getXAxisValues(), getDataSet());
@@ -46,56 +69,38 @@ public class ChartsActivity extends AppCompatActivity {
         chart.invalidate();
     }
 
+    static int getLastDayOfMonthUsingCalendar(int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, month);
+        return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
     private ArrayList getDataSet() {
-        ArrayList dataSets = null;
+        ArrayList dataSets = new ArrayList();
 
-        ArrayList valueSet1 = new ArrayList();
-        BarEntry v1e1 = new BarEntry(110.000f, 0); // Jan
-        valueSet1.add(v1e1);
-        BarEntry v1e2 = new BarEntry(40.000f, 1); // Feb
-        valueSet1.add(v1e2);
-        BarEntry v1e3 = new BarEntry(60.000f, 2); // Mar
-        valueSet1.add(v1e3);
-        BarEntry v1e4 = new BarEntry(30.000f, 3); // Apr
-        valueSet1.add(v1e4);
-        BarEntry v1e5 = new BarEntry(90.000f, 4); // May
-        valueSet1.add(v1e5);
-        BarEntry v1e6 = new BarEntry(100.000f, 5); // Jun
-        valueSet1.add(v1e6);
 
-        ArrayList valueSet2 = new ArrayList();
-        BarEntry v2e1 = new BarEntry(150.000f, 0); // Jan
-        valueSet2.add(v2e1);
-        BarEntry v2e2 = new BarEntry(90.000f, 1); // Feb
-        valueSet2.add(v2e2);
-        BarEntry v2e3 = new BarEntry(120.000f, 2); // Mar
-        valueSet2.add(v2e3);
-        BarEntry v2e4 = new BarEntry(60.000f, 3); // Apr
-        valueSet2.add(v2e4);
-        BarEntry v2e5 = new BarEntry(20.000f, 4); // May
-        valueSet2.add(v2e5);
-        BarEntry v2e6 = new BarEntry(80.000f, 5); // Jun
-        valueSet2.add(v2e6);
+        ArrayMap<String, Integer> map = (ArrayMap<String, Integer>) stat.getStatisticMapForDateRange();
+        ArrayList valueSet1 = null;
+        float c = 0;
+        BarDataSet barDataSet1 = null;
+        Random rnd = new Random();
 
-        BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Brand 1");
-        barDataSet1.setColor(Color.rgb(0, 155, 0));
-        BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Brand 2");
-        barDataSet2.setColors(ColorTemplate.COLORFUL_COLORS);
-
-        dataSets = new ArrayList();
-        dataSets.add(barDataSet1);
-        dataSets.add(barDataSet2);
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            valueSet1 = new ArrayList();
+            valueSet1.add(new BarEntry(c++, entry.getValue()));
+            barDataSet1 =  new BarDataSet(valueSet1, entry.getKey());
+            int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+            barDataSet1.setColors(color);
+            dataSets.add(barDataSet1);
+            System.out.println(entry.getKey() + "/" + entry.getValue());
+        }
         return dataSets;
     }
 
     private ArrayList getXAxisValues() {
         ArrayList xAxis = new ArrayList();
         xAxis.add("JAN");
-        xAxis.add("FEB");
-        xAxis.add("MAR");
-        xAxis.add("APR");
-        xAxis.add("MAY");
-        xAxis.add("JUN");
+
         return xAxis;
     }
 }

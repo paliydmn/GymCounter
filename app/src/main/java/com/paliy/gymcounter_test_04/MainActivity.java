@@ -347,17 +347,7 @@ public class MainActivity extends AppCompatActivity {
         updateDateTv(new Date());
     }
 
-    //#ToDo develop get statistic method
-    public Map<String, Integer> getStatisticMapForDateRange(){
-        Cursor cursor2 = dbManager.selectCountSumForDateRange("2023-01-01", "2023-01-25");
-        while (cursor2.moveToNext()) {
-            String titleStr = cursor2.getString(cursor2.getColumnIndex("title"));
-            String countStr = cursor2.getString(cursor2.getColumnIndex("counter"));
-            Log.println(Log.DEBUG, "TITLE  : ", titleStr);
-            Log.println(Log.DEBUG, "COUNT  : ", countStr);
-        }
-        return new ArrayMap<String, Integer>();
-    }
+
 
     public void initDefaultTitles() {
         titleList.addAll(Arrays.asList("PushUP", "PullUP", "ABS"));
@@ -406,7 +396,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onOpenChartsView(View view) {
         Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);
-        ChartsActivityIntent.putExtra("key", "Charts"); //Optional parameters
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        cal.setTime(dateOnTitleTV);// all done
+
+        ChartsActivityIntent.putExtra("dateRange", cal.toString()); //Optional parameters
         MainActivity.this.startActivity(ChartsActivityIntent);
 
     }
