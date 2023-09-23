@@ -3,29 +3,21 @@ package com.paliy.gymcounter_test_04;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.ArrayMap;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.util.ArrayMap;
-import android.view.View;
-import android.widget.Button;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -50,10 +42,10 @@ public class ChartsActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_charts);
 
-        int lastMonthDay =  getLastDayOfMonthUsingCalendar(calendar.get(Calendar.MONTH));
+        int lastMonthDay = getLastDayOfMonthUsingCalendar(calendar.get(Calendar.MONTH));
         Date end = new Date(123, calendar.get(Calendar.MONTH), lastMonthDay);
         Date start = new Date(123, calendar.get(Calendar.MONTH), 1);
-        stat = new Statistic(this, start,end);
+        stat = new Statistic(this, start, end);
         ChartTitle = stat.getDateRange();
         //System.out.println();
         BarChart chart = (BarChart) findViewById(R.id.chart);
@@ -88,7 +80,7 @@ public class ChartsActivity extends AppCompatActivity {
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             valueSet1 = new ArrayList();
             valueSet1.add(new BarEntry(c++, entry.getValue()));
-            barDataSet1 =  new BarDataSet(valueSet1, entry.getKey());
+            barDataSet1 = new BarDataSet(valueSet1, entry.getKey());
             int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
             barDataSet1.setColors(color);
             dataSets.add(barDataSet1);

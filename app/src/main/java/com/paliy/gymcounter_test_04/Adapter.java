@@ -121,8 +121,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             });
         }
 
-        public void show()
-        {
+        public void show() {
 
             final Dialog d = new Dialog(this.countTV.getContext());
             d.setTitle("NumberPicker");
@@ -135,8 +134,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             np.setMinValue(0);
             np.setWrapSelectorWheel(false);
             np.setOnValueChangedListener(this);
-            b1.setOnClickListener(new View.OnClickListener()
-            {
+            b1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int currentCount = Integer.parseInt(countTV.getText().toString());
@@ -153,8 +151,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     d.dismiss();
                 }
             });
-            b2.setOnClickListener(new View.OnClickListener()
-            {
+            b2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     d.dismiss();
@@ -201,17 +198,17 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             try {
                 dbManager.open();
                 Cursor cursor = dbManager.selectByTitleAndDate(currentViewDate, titleTV.getText().toString());
-                if (cursor.moveToFirst()){
-                    do{
+                if (cursor.moveToFirst()) {
+                    do {
                         String description = cursor.getString(cursor.getColumnIndex("description"));
                         infoTV.setText(description);
-                    }while(cursor.moveToNext());
+                    } while (cursor.moveToNext());
                 }
                 cursor.close();
                 infoTV.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (infoTV.getLineCount() > 2){
+                        if (infoTV.getLineCount() > 2) {
                             expandInfoImgV.setVisibility(View.VISIBLE);
                         }
                         // Use lineCount here
@@ -259,11 +256,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             });
 
             deleteBtn.setOnClickListener(view12 -> {
-              //  DBManager dbManager = new DBManager(ctx);
+                //  DBManager dbManager = new DBManager(ctx);
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        switch (which){
+                        switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
                                 try {
                                     dbManager.open();
@@ -296,13 +293,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             expandInfoImgV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (infoTV.getMaxLines() == 2)
-                    {
+                    if (infoTV.getMaxLines() == 2) {
                         infoTV.setMaxLines(10);
                         expandInfoImgV.setRotationX(180);
-                    }
-                    else
-                    {
+                    } else {
                         infoTV.setMaxLines(2);
                         expandInfoImgV.setRotationX(0);
                     }

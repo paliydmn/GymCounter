@@ -6,7 +6,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,16 +18,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -40,12 +35,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -86,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
-       //
+        //
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
 
         navigationView = findViewById(R.id.navigationView);
@@ -95,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         int height = displaymetrics.heightPixels;
         int width = displaymetrics.widthPixels;
 
-        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams(width/2, ViewGroup.LayoutParams.MATCH_PARENT));
-                activity_main = this;
+        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams(width / 2, ViewGroup.LayoutParams.MATCH_PARENT));
+        activity_main = this;
 
         dateTitleTV = findViewById(R.id.tvDate);
 
@@ -132,10 +124,11 @@ public class MainActivity extends AppCompatActivity {
             new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        recyclerView.setOnTouchListener(new OnSwipeTouchListener(this){
+        recyclerView.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
-              //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+                //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 navigationView.setVisibility(View.INVISIBLE);
@@ -145,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                         .setDuration(300);
                 return super.onTouch(v, event);
             }
+
             public void onSwipeRight() {
                 //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
 //                onBeforeDate(dateTitleTV);
@@ -157,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onSwipeLeft(MotionEvent e) {
-                 //onAfterDate(dateTitleTV);
+                //onAfterDate(dateTitleTV);
                 navigationView.setVisibility(View.INVISIBLE);
                 navigationView.animate()
                         .translationX(-navigationView.getWidth())
@@ -176,14 +170,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this){
+        dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
 
             public void onSwipeRight() {
                 //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
-              onBeforeDate(dateTitleTV);
+                onBeforeDate(dateTitleTV);
 
             }
 
@@ -194,22 +188,24 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeBottom() {
                 //#ToDo Refresh data
             }
-        public void myOnLongPress() {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
-            datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                    myCalendar.set(Calendar.YEAR, year);
-                    myCalendar.set(Calendar.MONTH, month);
-                    myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                    updateData(myCalendar.getTime());
+            public void myOnLongPress() {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
+                datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        myCalendar.set(Calendar.YEAR, year);
+                        myCalendar.set(Calendar.MONTH, month);
+                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                        updateData(myCalendar.getTime());
 //                    if (getDataForDate(myCalendar.getTime())) {
 //                        dateTitleTV.setText(TITLE_DATE_FORMAT.format(myCalendar.getTime()));
 //                    }
-                }
-            });
-            datePickerDialog.show();        }
+                    }
+                });
+                datePickerDialog.show();
+            }
         });
     }
 
@@ -261,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
         Calendar cal_new = Calendar.getInstance();
         cal_new.setTime(TODAY);
-        if (cal_new.get(Calendar.DAY_OF_YEAR) != cal.get(Calendar.DAY_OF_YEAR)){
+        if (cal_new.get(Calendar.DAY_OF_YEAR) != cal.get(Calendar.DAY_OF_YEAR)) {
             addNewExBtn.setVisibility(View.INVISIBLE);
         } else {
             addNewExBtn.setVisibility(View.VISIBLE);
@@ -348,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     public void initDefaultTitles() {
         titleList.addAll(Arrays.asList("PushUP", "PullUP", "ABS"));
         countList.addAll(Arrays.asList("0", "0", "0"));
@@ -369,9 +364,9 @@ public class MainActivity extends AppCompatActivity {
                     TextInputEditText newExDesc = dialogView.findViewById(R.id.newExeDescInpTxt);
                     String newTitle = newExTitle.getText().toString();
                     String newDesc = newExDesc.getText().toString();
-                    if(newDesc.isEmpty() || newDesc.equals(""))
+                    if (newDesc.isEmpty() || newDesc.equals(""))
                         newDesc = "No Description";
-                    dbManager.insert(newTitle, 0, new Date(), newDesc );
+                    dbManager.insert(newTitle, 0, new Date(), newDesc);
                     titleList.add(newTitle);
                     countList.add("0");
                 })
@@ -390,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateLabel(Date foDate) {
         //if (getDataForDate(foDate)) {
-            dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
+        dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
         //}
     }
 

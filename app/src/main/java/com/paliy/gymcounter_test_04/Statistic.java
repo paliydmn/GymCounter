@@ -22,7 +22,7 @@ public class Statistic {
 
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public Statistic(Context context, Date startDate, Date endDate){
+    public Statistic(Context context, Date startDate, Date endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
 
@@ -31,20 +31,19 @@ public class Statistic {
             dbManager.open();
         } catch (
                 SQLException throwable) {
-                 throwable.printStackTrace();
+            throwable.printStackTrace();
 
         }
     }
+
     public String getDateRange() {
         dateRange = String.format("%s %d - %d", new SimpleDateFormat("MMMM").format(startDate.getTime()), startDate.getDate(), endDate.getDate());
-        //dateRange = String.format("%s", new SimpleDateFormat("MMMM").format(startDate.getTime()));
         return dateRange;
     }
 
     //#ToDo develop get statistic method
-    public Map<String, Integer> getStatisticMapForDateRange(){
+    public Map<String, Integer> getStatisticMapForDateRange() {
         Cursor cursor2 = dbManager.selectCountSumForDateRange(dateFormat.format(startDate), dateFormat.format(endDate));
-        //Cursor cursor2 = dbManager.selectCountSumForDateRange("2023-01-01", "2023-01-25");
         ArrayMap<String, Integer> map = new ArrayMap<>();
 
         while (cursor2.moveToNext()) {
