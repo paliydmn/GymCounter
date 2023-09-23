@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -26,8 +29,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.data.BarData;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -38,9 +40,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -126,27 +131,6 @@ public class MainActivity extends AppCompatActivity {
         dateTitleTV.setOnClickListener(view -> {
             new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-
-/*        dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
-
-
-            public void myOnLongPress() {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
-                datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        myCalendar.set(Calendar.YEAR, year);
-                        myCalendar.set(Calendar.MONTH, month);
-                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                        if (getDataForDate(myCalendar.getTime())) {
-                            dateTitleTV.setText(TITLE_DATE_FORMAT.format(myCalendar.getTime()));
-                        }
-                    }
-                });
-                datePickerDialog.show();
-            }
-        });*/
 
         recyclerView.setOnTouchListener(new OnSwipeTouchListener(this){
             public void onSwipeTop() {
@@ -361,6 +345,18 @@ public class MainActivity extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
         updateDateTv(new Date());
+    }
+
+    //#ToDo develop get statistic method
+    public Map<String, Integer> getStatisticMapForDateRange(){
+        Cursor cursor2 = dbManager.selectCountSumForDateRange("2023-01-01", "2023-01-25");
+        while (cursor2.moveToNext()) {
+            String titleStr = cursor2.getString(cursor2.getColumnIndex("title"));
+            String countStr = cursor2.getString(cursor2.getColumnIndex("counter"));
+            Log.println(Log.DEBUG, "TITLE  : ", titleStr);
+            Log.println(Log.DEBUG, "COUNT  : ", countStr);
+        }
+        return new ArrayMap<String, Integer>();
     }
 
     public void initDefaultTitles() {

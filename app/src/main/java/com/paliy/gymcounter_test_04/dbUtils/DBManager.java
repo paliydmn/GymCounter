@@ -74,6 +74,17 @@ public class DBManager {
         return cursor;
     }
 
+    //SELECT title, SUM(counter) from main where _date between '2023-01-01' and '2023-01-25' GROUP BY title;
+    //public Cursor selectCountSumForDateRange(Date startDate, Date endDate) {
+    public Cursor selectCountSumForDateRange(String startDate, String endDate) {
+        String[] columns = new String[] { DBHelper.TITLE, String.format("SUM(%s) as counter", DBHelper.COUNT) };
+        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date BETWEEN '%s' AND '%s'", startDate,endDate), null, "title", null, null);
+        //Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s' BETWEEN _date = '%s'", dateFormat.format(startDate),dateFormat.format(endDate)), null, "title", null, null);
+        if (cursor != null) {
+            // cursor.moveToFirst();
+        }
+        return cursor;
+    }
     public int updateCounter(String title, int count, Date date, String desc) {
         //UPDATE main SET counter = (counter + 5) WHERE _date = '2022-12-25' AND title = 'PushUp' ;
         ContentValues contentValues = new ContentValues();
