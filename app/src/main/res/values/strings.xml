@@ -24,5 +24,9 @@
     <string name="cancel_button">Cancel</string>
     <string name="apply_button">Apply</string>
     <string name="no_description_text">No description available</string>
+    <string name="enter_title_hint">Enter title</string>
+    <string name="title">Title</string>
+    <string name="default_set_text_upper">DEFAULT SET</string>
+
 
 </resources>

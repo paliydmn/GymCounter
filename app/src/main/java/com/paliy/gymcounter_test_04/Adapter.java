@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.Build;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,11 +22,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -101,7 +106,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             infoTV = itemView.findViewById(R.id.infoTV);
 
             cardConstrLayout.setOnLongClickListener(v -> {
-                showNumberPicker();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    showNumberPicker();
+                }
                 //onShowItemMenu(v);
                 return true;
             });
@@ -123,14 +130,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             });
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.Q)
         public void showNumberPicker() {
             final Dialog d = new Dialog(this.countTV.getContext());
             d.setTitle("NumberPicker");
             d.setContentView(R.layout.num_picker_dialog);
             Button b1 = (Button) d.findViewById(R.id.button1);
             Button b2 = (Button) d.findViewById(R.id.button2);
-            final NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
-
+            NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
+            np.setTextColor(Color.WHITE);
+            np.setTextSize(80);
             np.setMaxValue(100);
             np.setMinValue(0);
             np.setWrapSelectorWheel(false);
