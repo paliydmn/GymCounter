@@ -25,18 +25,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
+    public static final String DESCRIPTION_FIELD = "description";
+    private final int PLUS_VALUE = 5;
     List<String> titleList;
     List<String> countList;
-
     Date currentViewDate;
     LayoutInflater inflater;
     View.OnClickListener listener;
+    View mainView;
 
     public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener) {
         this.listener = listener;
@@ -48,8 +49,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public void setCurrentViewDate(Date date) {
         currentViewDate = date;
     }
-
-    View mainView;
 
     @NonNull
     @Override
@@ -72,14 +71,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return titleList.size();
     }
 
+    //#ToDo seems this method is redundant
     public void changeAddBtnVisibility(ViewHolder holder) {
-        if (!new Date().before(currentViewDate)) {
-            holder.addBtn.setVisibility(View.GONE);
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        if (sdf.format(new Date()).equals(sdf.format(currentViewDate))) {
-            holder.addBtn.setVisibility(View.VISIBLE);
-        }
+//        if (!new Date().before(currentViewDate)) {
+//            holder.addBtn.setVisibility(View.GONE);
+//        }
+//        @SuppressLint("SimpleDateFormat")
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//        if (sdf.format(new Date()).equals(sdf.format(currentViewDate))) {
+//            holder.addBtn.setVisibility(View.VISIBLE);
+//        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, NumberPicker.OnValueChangeListener {
@@ -100,29 +101,29 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             infoTV = itemView.findViewById(R.id.infoTV);
 
             cardConstrLayout.setOnLongClickListener(v -> {
-                show();
+                showNumberPicker();
                 //onShowItemMenu(v);
                 return true;
             });
-            menuBtn.setOnClickListener(this::onShowItemMenu);
+            menuBtn.setOnClickListener(this::onShowCardMenu);
             addBtn.setOnClickListener(view -> {
                 Log.println(Log.DEBUG, "TEST", String.valueOf(getAdapterPosition()));
                 int currentVal = Integer.parseInt(countTV.getText().toString());
-                countTV.setText(String.valueOf(currentVal + 5));
-
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                    dbManager.updateCounterRaw((String) titleTV.getText(), 5, currentViewDate, " ");
+                    dbManager.updateCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate, " ");
+//                    notifyDataSetChanged();
+
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
                 dbManager.close();
+                countTV.setText(String.valueOf(currentVal + PLUS_VALUE));
             });
         }
 
-        public void show() {
-
+        public void showNumberPicker() {
             final Dialog d = new Dialog(this.countTV.getContext());
             d.setTitle("NumberPicker");
             d.setContentView(R.layout.num_picker_dialog);
@@ -158,7 +159,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 }
             });
             d.show();
-
         }
 
         @Override
@@ -166,13 +166,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
         }
 
-
         @Override
         public void onClick(View v) {
 
         }
 
-        public void onShowItemMenu(View view) {
+        public void onShowCardMenu(View view) {
             Context ctx = view.getContext();
             Dialog mDialog = new Dialog(view.getContext());
             // Get the layout inflater
@@ -190,36 +189,31 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             infoTV.setMovementMethod(new ScrollingMovementMethod());
 
             String mTitleTV = (String) titleTV.getText();
-
-
             mDialog.setContentView(dialogView);
-
             DBManager dbManager = new DBManager(ctx);
             try {
                 dbManager.open();
                 Cursor cursor = dbManager.selectByTitleAndDate(currentViewDate, titleTV.getText().toString());
                 if (cursor.moveToFirst()) {
                     do {
-                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                        String description = cursor.getString(cursor.getColumnIndex(DESCRIPTION_FIELD));
                         infoTV.setText(description);
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
+                dbManager.close();
                 infoTV.post(new Runnable() {
                     @Override
                     public void run() {
                         if (infoTV.getLineCount() > 2) {
                             expandInfoImgV.setVisibility(View.VISIBLE);
                         }
-                        // Use lineCount here
                     }
                 });
-
 
             } catch (SQLException throwable) {
                 throwable.printStackTrace();
             }
-            dbManager.close();
 
             editBtn.setOnClickListener(view1 -> {
                 //#ToDo edit title
@@ -238,25 +232,28 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                         DBManager dbManager = new DBManager(ctx);
                         try {
                             dbManager.open();
-                            String newString = editTitleText.getText().toString();
+                            String newTitle = editTitleText.getText().toString();
                             String newDescr = desciptionEditText.getText().toString();
-                            boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newString, newDescr, currentViewDate);
-                            if (res) {
-                                Toast.makeText(view1.getContext(), newString + " Edited!", Toast.LENGTH_SHORT).show();
-                                titleList.set(titleList.indexOf(mTitleTV), newString);
-                                notifyDataSetChanged();
-                                mDialog.cancel();
+                            if (!titleTV.getText().equals(newTitle) || !infoTV.getText().toString().equals(newDescr)) {
+                                boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newTitle, newDescr, currentViewDate);
+                                if (res) {
+                                    Toast.makeText(view1.getContext(), newTitle + " Edited!", Toast.LENGTH_SHORT).show();
+                                    //titleList.set(titleList.indexOf(mTitleTV), newTitle);
+                                    titleTV.setText(newTitle);
+                                    //ToDo BUG card counter resets after notifyDataSetChanged(); seems to be fixed
+                                    //notifyDataSetChanged();
+                                }
                             }
                         } catch (SQLException throwable) {
                             throwable.printStackTrace();
                         }
                         dbManager.close();
+                        mDialog.cancel();
                     }
                 });
             });
 
             deleteBtn.setOnClickListener(view12 -> {
-                //  DBManager dbManager = new DBManager(ctx);
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -307,7 +304,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 mDialog.cancel();
             });
             mDialog.show();
-
         }
     }
 }

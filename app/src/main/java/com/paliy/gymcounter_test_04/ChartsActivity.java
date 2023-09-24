@@ -23,9 +23,8 @@ import java.util.Random;
 
 public class ChartsActivity extends AppCompatActivity {
 
-    private String ChartTitle = "";
     private Statistic stat;
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +33,6 @@ public class ChartsActivity extends AppCompatActivity {
         String cal = intent.getStringExtra("dateRange");
 
         Calendar calendar = Calendar.getInstance();
-
         try {
             calendar.setTime(dateFormat.parse(cal));
         } catch (ParseException e) {
@@ -46,15 +44,13 @@ public class ChartsActivity extends AppCompatActivity {
         Date end = new Date(123, calendar.get(Calendar.MONTH), lastMonthDay);
         Date start = new Date(123, calendar.get(Calendar.MONTH), 1);
         stat = new Statistic(this, start, end);
-        ChartTitle = stat.getDateRange();
-        //System.out.println();
+        String chartTitle = stat.getDateRange();
         BarChart chart = (BarChart) findViewById(R.id.chart);
 
         Description description = new Description();
-        description.setText(ChartTitle);
+        description.setText(chartTitle);
 
         BarData data = new BarData(getDataSet());
-        //BarData data = new BarData(getXAxisValues(), getDataSet());
         chart.setData(data);
         chart.setDescription(description);
         chart.animateXY(2000, 2000);
@@ -72,9 +68,9 @@ public class ChartsActivity extends AppCompatActivity {
 
 
         ArrayMap<String, Integer> map = (ArrayMap<String, Integer>) stat.getStatisticMapForDateRange();
-        ArrayList valueSet1 = null;
+        ArrayList valueSet1;
         float c = 0;
-        BarDataSet barDataSet1 = null;
+        BarDataSet barDataSet1;
         Random rnd = new Random();
 
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
@@ -87,12 +83,5 @@ public class ChartsActivity extends AppCompatActivity {
             System.out.println(entry.getKey() + "/" + entry.getValue());
         }
         return dataSets;
-    }
-
-    private ArrayList getXAxisValues() {
-        ArrayList xAxis = new ArrayList();
-        xAxis.add("JAN");
-
-        return xAxis;
     }
 }

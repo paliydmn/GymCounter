@@ -32,7 +32,6 @@ public class Statistic {
         } catch (
                 SQLException throwable) {
             throwable.printStackTrace();
-
         }
     }
 

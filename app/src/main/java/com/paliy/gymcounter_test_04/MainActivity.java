@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
 
+    @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat TITLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy");
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
