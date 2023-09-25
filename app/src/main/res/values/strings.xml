@@ -27,6 +27,7 @@
     <string name="enter_title_hint">Enter title</string>
     <string name="title">Title</string>
     <string name="default_set_text_upper">DEFAULT SET</string>
+    <string name="open_charts">Open Charts</string>
 
 
 </resources>
