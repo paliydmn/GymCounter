@@ -43,7 +43,7 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
-                android:text="Title"
+                android:text="@string/title"
                 android:textAlignment="center"
                 android:textColor="#D1D1D1"
                 android:textSize="24sp"

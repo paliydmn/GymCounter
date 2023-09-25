@@ -301,10 +301,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 public void onClick(View v) {
                     if (infoTV.getMaxLines() == 2) {
                         infoTV.setMaxLines(10);
-                        expandInfoImgV.setRotationX(180);
+                        expandInfoImgV.setRotationX(0);
                     } else {
                         infoTV.setMaxLines(2);
-                        expandInfoImgV.setRotationX(0);
+                        expandInfoImgV.setRotationX(180);
                     }
                 }
             });

@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#E21D1E1D">
 
     <Button
         android:id="@+id/editTitleBtn"
@@ -45,8 +46,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
+        android:hint="@string/title"
         android:inputType="textPersonName"
         android:text="@string/title"
+        android:textColor="@color/grey_text_color_on_dark"
+        android:textColorHint="@color/dark_grey_hint_text"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.115"
@@ -74,12 +78,15 @@
         android:layout_marginTop="72dp"
         android:ems="10"
         android:gravity="top|start"
+        android:hint="@string/exercise_description"
         android:inputType="textMultiLine"
         android:lines="5"
         android:maxLines="15"
         android:minLines="3"
         android:scrollbars="vertical"
         android:text="@string/no_description_text"
+        android:textColor="@color/grey_text_color_on_dark"
+        android:textColorHint="@color/dark_grey_hint_text"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.114"
@@ -114,6 +121,7 @@
         android:scrollbars="vertical"
         android:text="@string/no_description_text"
         android:textAlignment="center"
+        android:textColor="@color/grey_text_color_on_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -126,6 +134,7 @@
         android:id="@+id/expandInfoImgV"
         android:layout_width="23dp"
         android:layout_height="19dp"
+        android:rotationX="180"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/infoTV"
         app:layout_constraintEnd_toEndOf="parent"
@@ -133,7 +142,7 @@
         app:layout_constraintStart_toEndOf="@+id/textView7"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.966"
-        app:srcCompat="@android:drawable/arrow_down_float" />
+        app:srcCompat="@drawable/expand_collapse" />
 
     <TextView
         android:id="@+id/textView7"
@@ -141,6 +150,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/exercise_description"
+        android:textColor="@color/grey_text_color_on_dark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

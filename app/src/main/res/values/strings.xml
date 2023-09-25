@@ -28,6 +28,9 @@
     <string name="title">Title</string>
     <string name="default_set_text_upper">DEFAULT SET</string>
     <string name="open_charts">Open Charts</string>
+    <string name="exercise_name_hint">Exercise Name</string>
+    <string name="exercise_description_hint">Exercise description</string>
+    <string name="add_new_exercise">Add New Exercise</string>
 
 
 </resources>
