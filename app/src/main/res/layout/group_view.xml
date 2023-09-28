@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<androidx.constraintlayout.widget.ConstraintLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:id="@+id/textGroup"
+        android:layout_width="170dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="this is a long text for test"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageButton2"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="false"
+        android:src="@drawable/edit_pen"
+        app:layout_constraintEnd_toStartOf="@+id/trashImB"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/editImB"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="false"
+        android:src="@drawable/submit_apply"
+        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/textGroup"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/trashImB"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:focusable="false"
+        android:src="@drawable/delete_trash"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/textGroup"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="50dp"-->
+<!--        android:layout_marginLeft="5dp"-->
+<!--        android:textColor="@android:color/white"-->
+<!--        android:textStyle="bold"-->
+<!--        android:layout_weight="1"-->
+
+
+
+<!--        app:layout_constraintEnd_toStartOf="@+id/button33"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+<!--    <Button-->
+<!--        android:id="@+id/button33"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="B"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+</androidx.constraintlayout.widget.ConstraintLayout>

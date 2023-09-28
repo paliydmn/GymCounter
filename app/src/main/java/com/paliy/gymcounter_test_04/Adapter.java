@@ -1,12 +1,12 @@
 package com.paliy.gymcounter_test_04;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Build;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -28,8 +28,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -78,14 +78,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     //#ToDo seems this method is redundant
     public void changeAddBtnVisibility(ViewHolder holder) {
-//        if (!new Date().before(currentViewDate)) {
-//            holder.addBtn.setVisibility(View.GONE);
-//        }
-//        @SuppressLint("SimpleDateFormat")
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-//        if (sdf.format(new Date()).equals(sdf.format(currentViewDate))) {
-//            holder.addBtn.setVisibility(View.VISIBLE);
-//        }
+        if (!new Date().before(currentViewDate)) {
+            holder.addBtn.setVisibility(View.GONE);
+        }
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        if (sdf.format(new Date()).equals(sdf.format(currentViewDate))) {
+            holder.addBtn.setVisibility(View.VISIBLE);
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, NumberPicker.OnValueChangeListener {
@@ -119,7 +119,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                    dbManager.updateCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate, " ");
+                    dbManager.updateAddCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate, " ");
 //                    notifyDataSetChanged();
 
                 } catch (SQLException throwable) {
@@ -140,20 +140,20 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
             np.setTextColor(Color.WHITE);
             np.setTextSize(80);
-            np.setMaxValue(100);
+            np.setMaxValue(1000);
             np.setMinValue(0);
+            np.setValue(Integer.parseInt(countTV.getText().toString()));
             np.setWrapSelectorWheel(false);
             np.setOnValueChangedListener(this);
             b1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int currentCount = Integer.parseInt(countTV.getText().toString());
                     int addToCounter = np.getValue();
-                    countTV.setText(String.valueOf(addToCounter + currentCount));
+                    countTV.setText(String.valueOf(addToCounter));
                     DBManager dbManager = new DBManager(addBtn.getContext());
                     try {
                         dbManager.open();
-                        dbManager.updateCounterRaw((String) titleTV.getText(), addToCounter, currentViewDate, " ");
+                        dbManager.updateSetCounterRaw((String) titleTV.getText(), addToCounter, currentViewDate, " ");
                     } catch (SQLException throwable) {
                         throwable.printStackTrace();
                     }

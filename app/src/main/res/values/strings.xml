@@ -31,6 +31,11 @@
     <string name="exercise_name_hint">Exercise Name</string>
     <string name="exercise_description_hint">Exercise description</string>
     <string name="add_new_exercise">Add New Exercise</string>
+    <string name="set_reps">Set Reps</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
+    <string name="set">Set</string>
+    <string name="sets">Sets</string>
 
 
 </resources>

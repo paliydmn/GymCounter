@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,10 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -81,7 +85,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide();
+//
+        // Находим наш list
+        ExpandableListView mExpandableListView = (ExpandableListView)findViewById(R.id.exListView);
+        ArrayList<ArrayList<String>> groups = initExpList();
 
+        //Создаем адаптер и передаем context и список с данными
+        ExpListAdapter exAdapter = new ExpListAdapter(getApplicationContext(), groups);
+        mExpandableListView.setAdapter(exAdapter);
+        mExpandableListView.setOnChildClickListener(myOnChildClickListener);
+        mExpandableListView.setOnGroupClickListener(myOnGroupClickListener);
+        mExpandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
+        mExpandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
+
+//
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
@@ -94,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         int height = displaymetrics.heightPixels;
         int width = displaymetrics.widthPixels;
 
-        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams(width / 2, ViewGroup.LayoutParams.MATCH_PARENT));
+        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width*0.75), ViewGroup.LayoutParams.MATCH_PARENT));
         activity_main = this;
 
         dateTitleTV = findViewById(R.id.tvDate);
@@ -214,6 +231,37 @@ public class MainActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
+    }
+
+    private ArrayList<ArrayList<String>> initExpList() {
+        //Создаем набор данных для адаптера
+        ArrayList<ArrayList<String>> groups = new ArrayList<ArrayList<String>>();
+        ArrayList<String> children1 = new ArrayList<String>();
+        ArrayList<String> children2 = new ArrayList<String>();
+        ArrayList<String> children3 = new ArrayList<String>();
+        ArrayList<String> children4 = new ArrayList<String>();
+        ArrayList<String> children5 = new ArrayList<String>();
+        children1.add("Child_1");
+        children1.add("Child_2");
+        groups.add(children1);
+        children2.add("Child_1");
+        children2.add("Child_2");
+        children2.add("Child_3");
+        groups.add(children2);
+
+        children3.add("Child_1");
+        children3.add("Child_2");
+        children3.add("Child_3");
+        groups.add(children3);
+        children4.add("Child_1");
+        children4.add("Child_2");
+        children4.add("Child_3");
+        groups.add(children4);
+        children5.add("Child_1");
+        children5.add("Child_2");
+        children5.add("Child_3");
+        groups.add(children5);
+        return groups;
     }
 
     public Date getDateOnTitleTV() {
@@ -396,4 +444,62 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.this.startActivity(ChartsActivityIntent);
 
     }
+
+    ExpandableListView.OnChildClickListener myOnChildClickListener = new ExpandableListView.OnChildClickListener() {
+
+        @Override
+        public boolean onChildClick(ExpandableListView parent, View v,
+                                    int groupPosition, int childPosition, long id) {
+            System.out.println("onChildClick");
+
+            return true;
+        }
+    };
+
+    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
+
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                                    int groupPosition, long id) {
+            System.out.println("OnGroupClickListener");
+            TextView textGroup = v.findViewById(R.id.textGroup);
+            textGroup.setSingleLine(true);
+//            v.chi
+//            boolean isSelected = textGroup.isSelected();
+//
+//            if(isSelected){
+//                textGroup.setSelected(true);
+//            } else
+//            {
+//                textGroup.setSingleLine(false);
+//                textGroup.setSelected(false);
+//            }
+//           // textGroup.setEllipsize(TextUtils.TruncateAt.END);
+//            textGroup.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+//            textGroup.setHorizontallyScrolling(true);
+            return false;
+        }
+    };
+
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = new ExpandableListView.OnGroupCollapseListener() {
+
+        @Override
+        public void onGroupCollapse(int groupPosition) {
+            // group collapse at groupPosition
+
+            System.out.println("OnGroupCollapseListener");
+        }
+    };
+
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = new ExpandableListView.OnGroupExpandListener() {
+
+        @Override
+        public void onGroupExpand(int groupPosition) {
+            // group expand at groupPosition
+            System.out.println("OnGroupExpandListener");
+
+        }
+    };
+
 }
