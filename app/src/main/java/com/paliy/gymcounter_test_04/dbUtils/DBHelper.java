@@ -20,10 +20,10 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "GymCounter.DB";
 
     // database version
-    static final int DB_VERSION = 7;
+    static final int DB_VERSION = 8;
 
     // Creating table query
-    private static final String CREATE_TABLE = "create table "
+    private static final String CREATE_MAIN_TABLE = "create table "
             + TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + TITLE + " TEXT NOT NULL, "
             + COUNT + " INTEGER, "
@@ -31,13 +31,29 @@ public class DBHelper extends SQLiteOpenHelper {
             + DATE + " INTEGER NOT NULL, "
             + DESC + " TEXT);";
 
+    private static final String CREATE_EXERCISE_TABLE = "CREATE TABLE 'exercise' " +
+            "('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, " +
+            "'set_id' INTEGER NOT NULL, " +
+            "'ex_name' TEXT NOT NULL, " +
+            "'counter' INTEGER, " +
+            "'description' TEXT, " +
+            "'status' INTEGER, " +
+            "FOREIGN KEY('set_id') REFERENCES 'sets'('id'));";
+
+    private static final String CREATE_SETS_TABLE = "CREATE TABLE 'sets' " +
+            "('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE," +
+            "'set_name' TEXT," +
+            "'status' INTEGER)";
+
     public DBHelper (Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_TABLE);
+        sqLiteDatabase.execSQL(CREATE_MAIN_TABLE);
+        sqLiteDatabase.execSQL(CREATE_SETS_TABLE);
+        sqLiteDatabase.execSQL(CREATE_EXERCISE_TABLE);
     }
 
     @Override

@@ -88,17 +88,6 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                 System.out.println("TRASH! # " + groupPosition);
             }
         });
-//        textGroup.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                System.out.println("stststst");
-//              //  textGroup.setSelected(true);
-//
-//
-//            }
-//        });
-//        ImageView imageButton = (ImageView) convertView.findViewById(R.id.imageButton);
-//        imageButton.setFocusable(false);
 
         return convertView;
 
