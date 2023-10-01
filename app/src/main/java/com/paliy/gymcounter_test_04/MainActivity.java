@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,14 +63,72 @@ public class MainActivity extends AppCompatActivity {
         myCalendar.set(Calendar.DAY_OF_MONTH, day);
         updateLabel(myCalendar.getTime());
     };
+    TextView addNewSetTVBtn;
     FloatingActionButton addNewExBtn;
     Date dateOnTitleTV;
     Adapter adapter;
     DrawerLayout drawerLayout;
     MainActivity activity_main;
     Toolbar toolbar;
+
+    ExpListAdapter expandableListAdapter;
+    List<String> expandableListTitle;
+    HashMap<String, List<String>> expandableListDetail;
+
+
+    ExpandableListView.OnChildClickListener myOnChildClickListener = new ExpandableListView.OnChildClickListener() {
+
+        @Override
+        public boolean onChildClick(ExpandableListView parent, View v,
+                                    int groupPosition, int childPosition, long id) {
+            System.out.println("onChildClick");
+
+            return true;
+        }
+    };
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = new ExpandableListView.OnGroupCollapseListener() {
+
+        @Override
+        public void onGroupCollapse(int groupPosition) {
+            // group collapse at groupPosition
+
+            System.out.println("OnGroupCollapseListener");
+        }
+    };
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = new ExpandableListView.OnGroupExpandListener() {
+
+        @Override
+        public void onGroupExpand(int groupPosition) {
+            // group expand at groupPosition
+            System.out.println("OnGroupExpandListener");
+
+        }
+    };
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
+    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
+
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                                    int groupPosition, long id) {
+            System.out.println("OnGroupClickListener");
+            TextView textGroup = v.findViewById(R.id.textGroup);
+            TextView addNewSet = v.findViewById(R.id.addNewExTVBtn);
+            textGroup.setSingleLine(true);
+
+            String set_name = (String) textGroup.getText();
+            addNewSet.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("ADD NEW Ex!");
+                    dbManager.insertNewExToSetRaw(set_name, "1 Pupa Sq", "do like a boss! ", 0);
+                    refreshExListView();
+                }
+            });
+            return false;
+        }
+    };
 
     private static Calendar addDayToTitle(Date dateOnTitleTV, int i) {
         Calendar cal = Calendar.getInstance();
@@ -85,25 +143,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide();
-//
-        // Находим наш list
-        ExpandableListView mExpandableListView = (ExpandableListView)findViewById(R.id.exListView);
-        ArrayList<ArrayList<String>> groups = initExpList();
 
-        //Создаем адаптер и передаем context и список с данными
-        ExpListAdapter exAdapter = new ExpListAdapter(getApplicationContext(), groups);
-        mExpandableListView.setAdapter(exAdapter);
-        mExpandableListView.setOnChildClickListener(myOnChildClickListener);
-        mExpandableListView.setOnGroupClickListener(myOnGroupClickListener);
-        mExpandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
-        mExpandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
-
-//
         recyclerView = findViewById(R.id.recyclerView);
         dateAfterBtn = findViewById(R.id.btnRightDate);
         dateBeforeBtn = findViewById(R.id.btnLeftDate);
-        //
+        //ToDo addNewExBtn = findViewById(R.id.addNewItemFABtn); should add new Ex to currently selected SET.
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
+        // Add new Ex to SET at Expandable List
+        addNewSetTVBtn = findViewById(R.id.addNewSetTVBtn);
 
         navigationView = findViewById(R.id.navigationView);
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -111,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         int height = displaymetrics.heightPixels;
         int width = displaymetrics.widthPixels;
 
-        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width*0.75), ViewGroup.LayoutParams.MATCH_PARENT));
+        navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width * 0.75), ViewGroup.LayoutParams.MATCH_PARENT));
         activity_main = this;
 
         dateTitleTV = findViewById(R.id.tvDate);
@@ -126,6 +173,22 @@ public class MainActivity extends AppCompatActivity {
             throwable.printStackTrace();
         }
 
+
+        //
+        //
+        ExpandableListView expandableListView = findViewById(R.id.exListView);
+        expandableListDetail = initExpList();
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListAdapter = new ExpListAdapter(this, expandableListTitle, expandableListDetail);
+        expandableListView.setAdapter(expandableListAdapter);
+
+        expandableListView.setAdapter(expandableListAdapter);
+        expandableListView.setOnChildClickListener(myOnChildClickListener);
+        expandableListView.setOnGroupClickListener(myOnGroupClickListener);
+        expandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
+        expandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
+
+//
         adapter = new Adapter(this, titleList, countList, listener);
 
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -194,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        dateTitleTV.setOnTouchListener(new OnSwipeTouchListener(this) {
+        OnSwipeTouchListener onSwipeTouchListener = new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
@@ -221,47 +284,57 @@ public class MainActivity extends AppCompatActivity {
                         myCalendar.set(Calendar.YEAR, year);
                         myCalendar.set(Calendar.MONTH, month);
                         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
                         updateData(myCalendar.getTime());
-//                    if (getDataForDate(myCalendar.getTime())) {
-//                        dateTitleTV.setText(TITLE_DATE_FORMAT.format(myCalendar.getTime()));
-//                    }
                     }
                 });
                 datePickerDialog.show();
             }
+        };
+        dateTitleTV.setOnTouchListener(onSwipeTouchListener);
+
+        addNewSetTVBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dbManager.insertNewSet("2_squad", 0);
+                //#Todo If insert success refresh expandableListView
+                //expandableListAdapter.setNewItems();
+                refreshExListView();
+            }
         });
     }
 
-    private ArrayList<ArrayList<String>> initExpList() {
-        //Создаем набор данных для адаптера
-        ArrayList<ArrayList<String>> groups = new ArrayList<ArrayList<String>>();
-        ArrayList<String> children1 = new ArrayList<String>();
-        ArrayList<String> children2 = new ArrayList<String>();
-        ArrayList<String> children3 = new ArrayList<String>();
-        ArrayList<String> children4 = new ArrayList<String>();
-        ArrayList<String> children5 = new ArrayList<String>();
-        children1.add("Child_1");
-        children1.add("Child_2");
-        groups.add(children1);
-        children2.add("Child_1");
-        children2.add("Child_2");
-        children2.add("Child_3");
-        groups.add(children2);
+    private void refreshExListView() {
+        expandableListDetail = initExpList();
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListAdapter.setNewItems(expandableListTitle,expandableListDetail);
+        expandableListAdapter.notifyDataSetChanged();
+    }
 
-        children3.add("Child_1");
-        children3.add("Child_2");
-        children3.add("Child_3");
-        groups.add(children3);
-        children4.add("Child_1");
-        children4.add("Child_2");
-        children4.add("Child_3");
-        groups.add(children4);
-        children5.add("Child_1");
-        children5.add("Child_2");
-        children5.add("Child_3");
-        groups.add(children5);
-        return groups;
+    private HashMap<String, List<String>> initExpList() {
+
+        HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
+        Cursor cursor = dbManager.selectTest();
+        List<String> exChildItem;
+        if (cursor.getCount() >= 1) {
+            while (cursor.moveToNext()) {
+                String set_name = cursor.getString(cursor.getColumnIndex("set_name"));
+                System.out.println("SETS = " + set_name);
+                Cursor cursor2 = dbManager.selectExs(set_name);
+                exChildItem = new ArrayList<String>();
+
+                if (cursor2.getCount() >= 1) {
+                    while (cursor2.moveToNext()) {
+                        String ex_name = cursor2.getString(cursor2.getColumnIndex("ex_name"));
+                        System.out.println("EXERCISE = " + ex_name);
+                        exChildItem.add(ex_name);
+                    }
+                }
+                expandableListDetail.put(set_name, exChildItem);
+                cursor2.close();
+            }
+        }
+        cursor.close();
+        return expandableListDetail;
     }
 
     public Date getDateOnTitleTV() {
@@ -285,6 +358,32 @@ public class MainActivity extends AppCompatActivity {
         Calendar cal = addDayToTitle(dateOnTitleTV, forDay);
         updateDataForDate(cal);
     }
+
+//    public boolean getDataForDate(Date date) {
+//        Cursor cursor = dbManager.selectByDate(date);
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//
+//        if (cursor.getCount() <= 0) {
+//            Toast toast = Toast.makeText(getApplicationContext(),
+//                    "No DATA for " + TITLE_DATE_FORMAT.format(date), Toast.LENGTH_SHORT);
+//            toast.show();
+//            return false;
+//        } else {
+//            clearAllListData();
+//            updateDateTv(date);
+//            adapter.setCurrentViewDate(dateOnTitleTV);
+//            while (cursor.moveToNext()) {
+//                initLists(cursor);
+//            }
+//            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
+//                addNewExBtn.setVisibility(View.INVISIBLE);
+//            } else {
+//                addNewExBtn.setVisibility(View.VISIBLE);
+//            }
+//            adapter.notifyDataSetChanged();
+//            return true;
+//        }
+//    }
 
     public void updateData(Date date) {
         Calendar cal = Calendar.getInstance();
@@ -329,32 +428,6 @@ public class MainActivity extends AppCompatActivity {
         titleList.add(cursor.getString(cursor.getColumnIndex("title")));
         countList.add(cursor.getString(cursor.getColumnIndex("counter")));
     }
-
-//    public boolean getDataForDate(Date date) {
-//        Cursor cursor = dbManager.selectByDate(date);
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-//
-//        if (cursor.getCount() <= 0) {
-//            Toast toast = Toast.makeText(getApplicationContext(),
-//                    "No DATA for " + TITLE_DATE_FORMAT.format(date), Toast.LENGTH_SHORT);
-//            toast.show();
-//            return false;
-//        } else {
-//            clearAllListData();
-//            updateDateTv(date);
-//            adapter.setCurrentViewDate(dateOnTitleTV);
-//            while (cursor.moveToNext()) {
-//                initLists(cursor);
-//            }
-//            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
-//                addNewExBtn.setVisibility(View.INVISIBLE);
-//            } else {
-//                addNewExBtn.setVisibility(View.VISIBLE);
-//            }
-//            adapter.notifyDataSetChanged();
-//            return true;
-//        }
-//    }
 
     public boolean initTodayData() {
         setTodayData();
@@ -444,62 +517,5 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.this.startActivity(ChartsActivityIntent);
 
     }
-
-    ExpandableListView.OnChildClickListener myOnChildClickListener = new ExpandableListView.OnChildClickListener() {
-
-        @Override
-        public boolean onChildClick(ExpandableListView parent, View v,
-                                    int groupPosition, int childPosition, long id) {
-            System.out.println("onChildClick");
-
-            return true;
-        }
-    };
-
-    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
-
-        @RequiresApi(api = Build.VERSION_CODES.Q)
-        @Override
-        public boolean onGroupClick(ExpandableListView parent, View v,
-                                    int groupPosition, long id) {
-            System.out.println("OnGroupClickListener");
-            TextView textGroup = v.findViewById(R.id.textGroup);
-            textGroup.setSingleLine(true);
-//            v.chi
-//            boolean isSelected = textGroup.isSelected();
-//
-//            if(isSelected){
-//                textGroup.setSelected(true);
-//            } else
-//            {
-//                textGroup.setSingleLine(false);
-//                textGroup.setSelected(false);
-//            }
-//           // textGroup.setEllipsize(TextUtils.TruncateAt.END);
-//            textGroup.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-//            textGroup.setHorizontallyScrolling(true);
-            return false;
-        }
-    };
-
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = new ExpandableListView.OnGroupCollapseListener() {
-
-        @Override
-        public void onGroupCollapse(int groupPosition) {
-            // group collapse at groupPosition
-
-            System.out.println("OnGroupCollapseListener");
-        }
-    };
-
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = new ExpandableListView.OnGroupExpandListener() {
-
-        @Override
-        public void onGroupExpand(int groupPosition) {
-            // group expand at groupPosition
-            System.out.println("OnGroupExpandListener");
-
-        }
-    };
 
 }

@@ -11,12 +11,9 @@ import java.util.Date;
 
 
 public class DBManager {
-    private DBHelper dbHelper;
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-
     private final Context context;
-
+    private DBHelper dbHelper;
     private SQLiteDatabase database;
 
     public DBManager(Context c) {
@@ -39,12 +36,12 @@ public class DBManager {
         contentValue.put(DBHelper.COUNT, count);
         contentValue.put(DBHelper.DATE, dateFormat.format(date));
         contentValue.put(DBHelper.DESC, desc);
-        database.insert(DBHelper.TABLE_NAME, null, contentValue);
+        database.insert(DBHelper.MAIN_TABLE_NAME, null, contentValue);
     }
 
     public Cursor select() {
         String[] columns = new String[]{DBHelper._ID, DBHelper.TITLE, DBHelper.COUNT, DBHelper.DATE, DBHelper.DESC};
-        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = database.query(DBHelper.MAIN_TABLE_NAME, columns, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
         }
@@ -55,7 +52,7 @@ public class DBManager {
     public Cursor selectByDate(Date date) {
         //SELECT * from main where _date = date('now', '-1 days');
         String[] columns = new String[]{DBHelper._ID, DBHelper.TITLE, DBHelper.COUNT, DBHelper.DATE, DBHelper.DESC};
-        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s'", dateFormat.format(date)), null, null, null, null);
+        Cursor cursor = database.query(DBHelper.MAIN_TABLE_NAME, columns, String.format("_date = '%s'", dateFormat.format(date)), null, null, null, null);
         if (cursor != null) {
             // cursor.moveToFirst();
         }
@@ -65,7 +62,7 @@ public class DBManager {
     //#Todo check if that select is needed
     public Cursor selectByTitleAndDate(Date date, String title) {
         String[] columns = new String[]{DBHelper.DESC};
-        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s' AND title='%s'", dateFormat.format(date), title), null, null, null, null);
+        Cursor cursor = database.query(DBHelper.MAIN_TABLE_NAME, columns, String.format("_date = '%s' AND title='%s'", dateFormat.format(date), title), null, null, null, null);
         if (cursor != null) {
             // cursor.moveToFirst();
         }
@@ -76,7 +73,7 @@ public class DBManager {
     //public Cursor selectCountSumForDateRange(Date startDate, Date endDate) {
     public Cursor selectCountSumForDateRange(String startDate, String endDate) {
         String[] columns = new String[]{DBHelper.TITLE, String.format("SUM(%s) as counter", DBHelper.COUNT)};
-        Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date BETWEEN '%s' AND '%s'", startDate, endDate), null, "title", null, null);
+        Cursor cursor = database.query(DBHelper.MAIN_TABLE_NAME, columns, String.format("_date BETWEEN '%s' AND '%s'", startDate, endDate), null, "title", null, null);
         //Cursor cursor = database.query(DBHelper.TABLE_NAME, columns, String.format("_date = '%s' BETWEEN _date = '%s'", dateFormat.format(startDate),dateFormat.format(endDate)), null, "title", null, null);
         if (cursor != null) {
             // cursor.moveToFirst();
@@ -89,7 +86,7 @@ public class DBManager {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.COUNT, ("(" + DBHelper.COUNT + " + " + count + ")"));
         contentValues.put(DBHelper.DESC, desc);
-        int i = database.update(DBHelper.TABLE_NAME, contentValues, DBHelper.TITLE + " = '" + title + "' AND " + DBHelper.DATE + " = '" + dateFormat.format(date) + "'", null);
+        int i = database.update(DBHelper.MAIN_TABLE_NAME, contentValues, DBHelper.TITLE + " = '" + title + "' AND " + DBHelper.DATE + " = '" + dateFormat.format(date) + "'", null);
 
         return i;
     }
@@ -119,7 +116,48 @@ public class DBManager {
     }
 
     public int delete(String title, Date date) {
-        return database.delete(DBHelper.TABLE_NAME, DBHelper.TITLE + " = '" + title + "' AND _date = '" + dateFormat.format(date) + "'", null);
+        return database.delete(DBHelper.MAIN_TABLE_NAME, DBHelper.TITLE + " = '" + title + "' AND _date = '" + dateFormat.format(date) + "'", null);
+    }
 
+    //Todo check for UNIQUE constraint set_name
+    public void insertNewSet(String set_name, int status) {
+        ContentValues contentValue = new ContentValues();
+        contentValue.put(DBHelper.SET_NAME, set_name);
+        contentValue.put(DBHelper.STATUS, status);
+        long res = database.insert(DBHelper.SETS_TABLE_NAME, null, contentValue);
+        System.out.println(res);
+    }
+
+    public void insertNewExToSetRaw(String set_name, String ex_name, String ex_descr, int status) {
+        //INSERT INTO main (set_name, title, counter, description, _date, set_id)
+        // SELECT sets.set_name, exercise.ex_name, 0, exercise.description, datetime(), sets.id FROM exercise
+        // INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = "Back3"
+
+        //INSERT INTO exercise (set_id, ex_name, counter, description, status) VALUES ((SELECT id FROM sets WHERE set_name = 'back'), "Stand Up", 0, "We do it hard +16kg", 0);
+        String strSQL = "INSERT INTO exercise (set_id, ex_name, counter, description, status) " +
+                "VALUES " +
+                "((SELECT id FROM sets WHERE set_name = '" + set_name + "'), '" +
+                ex_name + "', 0, '" +
+                ex_descr + "', " + status + ");";
+        database.execSQL(strSQL);
+    }
+
+    public Cursor selectTest() {
+        String[] columns = new String[]{"set_name", "status", "id"};
+        Cursor cursor = database.query("sets", columns, null, null, null, null, null);
+        if (cursor != null) {
+            // cursor.moveToFirst();
+        }
+        return cursor;
+    }
+
+    public Cursor selectExs(String set_name) {
+        String[] columns = new String[]{"ex_name", "description"};
+        //SELECT sets.set_name, exercise.ex_name, 0, exercise.description, datetime(), sets.id FROM exercise INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = "Back3"
+        Cursor cursor = database.rawQuery("SELECT exercise.ex_name, exercise.description FROM exercise INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = '" + set_name + "'", null);
+        if (cursor != null) {
+            // cursor.moveToFirst();
+        }
+        return cursor;
     }
 }

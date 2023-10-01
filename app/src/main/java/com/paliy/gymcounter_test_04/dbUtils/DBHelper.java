@@ -7,24 +7,29 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     // Table Name
-    public static final String TABLE_NAME = "main";
+    public static final String MAIN_TABLE_NAME = "main";
+    public static final String SETS_TABLE_NAME = "sets";
 
-    // Table columns
+    // Main Table columns
     public static final String _ID = "_id";
     public static final String TITLE = "title";
     public static final String COUNT = "counter";
     public static final String DATE = "_date";
     public static final String DESC = "description";
 
+    // SETS Table columns
+    public static final String SET_NAME = "set_name";
+    public static final String STATUS = "status";
+
     // Database Information
     static final String DB_NAME = "GymCounter.DB";
 
     // database version
-    static final int DB_VERSION = 8;
+    static final int DB_VERSION = 9;
 
     // Creating table query
     private static final String CREATE_MAIN_TABLE = "create table "
-            + TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + MAIN_TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + TITLE + " TEXT NOT NULL, "
             + COUNT + " INTEGER, "
          //   + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
@@ -42,7 +47,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_SETS_TABLE = "CREATE TABLE 'sets' " +
             "('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE," +
-            "'set_name' TEXT," +
+            "'set_name' TEXT NOT NULL UNIQUE," +
             "'status' INTEGER)";
 
     public DBHelper (Context context) {
@@ -58,7 +63,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MAIN_TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }
