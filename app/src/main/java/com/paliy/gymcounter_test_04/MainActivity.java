@@ -14,7 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     TextView addNewSetTVBtn;
     FloatingActionButton addNewExBtn;
     Date dateOnTitleTV;
-    Adapter adapter;
+    Adapter mViewHolderAdapter;
     DrawerLayout drawerLayout;
     MainActivity activity_main;
     Toolbar toolbar;
@@ -75,36 +75,20 @@ public class MainActivity extends AppCompatActivity {
     ExpListAdapter expandableListAdapter;
     List<String> expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
+    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
+        System.out.println("onChildClick");
 
-    ImageView trashImB;
-
-    ExpandableListView.OnChildClickListener myOnChildClickListener = new ExpandableListView.OnChildClickListener() {
-
-        @Override
-        public boolean onChildClick(ExpandableListView parent, View v,
-                                    int groupPosition, int childPosition, long id) {
-            System.out.println("onChildClick");
-
-            return true;
-        }
+        return true;
     };
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = new ExpandableListView.OnGroupCollapseListener() {
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
+        // group collapse at groupPosition
 
-        @Override
-        public void onGroupCollapse(int groupPosition) {
-            // group collapse at groupPosition
-
-            System.out.println("OnGroupCollapseListener");
-        }
+        System.out.println("OnGroupCollapseListener");
     };
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = new ExpandableListView.OnGroupExpandListener() {
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
+        // group expand at groupPosition
+        System.out.println("OnGroupExpandListener");
 
-        @Override
-        public void onGroupExpand(int groupPosition) {
-            // group expand at groupPosition
-            System.out.println("OnGroupExpandListener");
-
-        }
     };
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
@@ -118,28 +102,70 @@ public class MainActivity extends AppCompatActivity {
             TextView textGroup = v.findViewById(R.id.textGroup);
             TextView addNewSet = v.findViewById(R.id.addNewExTVBtn);
             textGroup.setSingleLine(true);
-
-            trashImB = v.findViewById(R.id.trashImB);
-
+            ImageView trashImB = v.findViewById(R.id.trashImB);
             String set_name = (String) textGroup.getText();
-            addNewSet.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("ADD NEW Ex!");
-                    dbManager.insertNewExToSetRaw(set_name, "1 Pupa Sq", "do like a boss! ", 0);
-                    refreshExListView();
-                }
+
+            addNewSet.setOnClickListener(view -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                LayoutInflater inflater = getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(dialogView)
+                        .setPositiveButton("Add", (dialog, id1) -> {
+                            EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
+                            EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
+                            //#ToDo check is empty, check if exists - do not create
+                            if (!ex_name.getText().toString().isEmpty()) {
+                                System.out.println("ADD NEW Ex!");
+                                dbManager.insertNewExToSetRaw(set_name, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
+                                refreshExListView();
+                                //#Todo If insert success refresh expandableListView
+                                refreshExListView();
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton("Cancel", (dialog, id1) -> {
+                        });
+                builder.create();
+                builder.show();
             });
 
-            trashImB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("DELETE SET");
-                    dbManager.deleteSetByName(set_name);
-                    refreshExListView();
-                }
+            trashImB.setOnClickListener(view -> {
+                System.out.println("DELETE SET");
+                dbManager.deleteSetByName(set_name);
+                refreshExListView();
             });
             return false;
+        }
+    };
+    View.OnClickListener onAddNewSetListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+            LayoutInflater inflater = getLayoutInflater();
+            // Inflate and set the layout for the dialog
+            final View dialogView = inflater.inflate(R.layout.new_set_form, null);
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(dialogView)
+                    .setPositiveButton("Add", (dialog, id) -> {
+                        EditText set_name = dialogView.findViewById(R.id.setNameEdText);
+                        //#ToDo check is empty, check if exists - do not create
+                        if (!set_name.getText().toString().isEmpty()) {
+                            dbManager.insertNewSet(set_name.getText().toString(), 0);
+                            //#Todo If insert success refresh expandableListView
+                            //expandableListAdapter.setNewItems();
+                            refreshExListView();
+                        } else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Set Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> {
+                    });
+            builder.create();
+            builder.show();
         }
     };
 
@@ -172,12 +198,12 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width * 0.75), ViewGroup.LayoutParams.MATCH_PARENT));
         activity_main = this;
-
         dateTitleTV = findViewById(R.id.tvDate);
 
         titleList = new ArrayList<>();
         countList = new ArrayList<>();
 
+        //add db manager instance
         dbManager = new DBManager(this);
         try {
             dbManager.open();
@@ -185,45 +211,40 @@ public class MainActivity extends AppCompatActivity {
             throwable.printStackTrace();
         }
 
-
-        //
-        //
+        //Expandable List View block
         ExpandableListView expandableListView = findViewById(R.id.exListView);
+        //Init exList with data from db and update
         expandableListDetail = initExpList();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-
-        expandableListView.setAdapter(expandableListAdapter);
+//        expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(myOnChildClickListener);
         expandableListView.setOnGroupClickListener(myOnGroupClickListener);
         expandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
         expandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
 
-//
-        adapter = new Adapter(this, titleList, countList, listener);
+        mViewHolderAdapter = new Adapter(this, titleList, countList, listener);
 
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        mViewHolderAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
             }
         });
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(mViewHolderAdapter);
 
         initTodayData();
         updateDateTv(new Date());
-        adapter.setCurrentViewDate(dateOnTitleTV);
+        mViewHolderAdapter.setCurrentViewDate(dateOnTitleTV);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setAdapter(adapter);
-
+        recyclerView.setAdapter(mViewHolderAdapter);
 
         dateTitleTV.setOnClickListener(view -> {
             new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-
-        recyclerView.setOnTouchListener(new OnSwipeTouchListener(this) {
+        OnSwipeTouchListener onRecyclerViewSwipeTouchListener = new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
@@ -267,8 +288,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
 
             }
-        });
-
+        };
         OnSwipeTouchListener onSwipeTouchListener = new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 // Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
@@ -290,35 +310,25 @@ public class MainActivity extends AppCompatActivity {
 
             public void myOnLongPress() {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(dateTitleTV.getContext());
-                datePickerDialog.setOnDateSetListener(new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        myCalendar.set(Calendar.YEAR, year);
-                        myCalendar.set(Calendar.MONTH, month);
-                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        updateData(myCalendar.getTime());
-                    }
+                datePickerDialog.setOnDateSetListener((view, year, month, dayOfMonth) -> {
+                    myCalendar.set(Calendar.YEAR, year);
+                    myCalendar.set(Calendar.MONTH, month);
+                    myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    updateData(myCalendar.getTime());
                 });
                 datePickerDialog.show();
             }
         };
-        dateTitleTV.setOnTouchListener(onSwipeTouchListener);
 
-        addNewSetTVBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dbManager.insertNewSet("2_squad", 0);
-                //#Todo If insert success refresh expandableListView
-                //expandableListAdapter.setNewItems();
-                refreshExListView();
-            }
-        });
+        recyclerView.setOnTouchListener(onRecyclerViewSwipeTouchListener);
+        dateTitleTV.setOnTouchListener(onSwipeTouchListener);
+        addNewSetTVBtn.setOnClickListener(onAddNewSetListener);
     }
 
     private void refreshExListView() {
         expandableListDetail = initExpList();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter.setNewItems(expandableListTitle,expandableListDetail);
+        expandableListAdapter.setNewItems(expandableListTitle, expandableListDetail);
         expandableListAdapter.notifyDataSetChanged();
     }
 
@@ -371,32 +381,6 @@ public class MainActivity extends AppCompatActivity {
         updateDataForDate(cal);
     }
 
-//    public boolean getDataForDate(Date date) {
-//        Cursor cursor = dbManager.selectByDate(date);
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-//
-//        if (cursor.getCount() <= 0) {
-//            Toast toast = Toast.makeText(getApplicationContext(),
-//                    "No DATA for " + TITLE_DATE_FORMAT.format(date), Toast.LENGTH_SHORT);
-//            toast.show();
-//            return false;
-//        } else {
-//            clearAllListData();
-//            updateDateTv(date);
-//            adapter.setCurrentViewDate(dateOnTitleTV);
-//            while (cursor.moveToNext()) {
-//                initLists(cursor);
-//            }
-//            if (!sdf.format(TODAY).equals(sdf.format(dateOnTitleTV))) {
-//                addNewExBtn.setVisibility(View.INVISIBLE);
-//            } else {
-//                addNewExBtn.setVisibility(View.VISIBLE);
-//            }
-//            adapter.notifyDataSetChanged();
-//            return true;
-//        }
-//    }
-
     public void updateData(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -411,11 +395,11 @@ public class MainActivity extends AppCompatActivity {
             while (cursor.moveToNext()) {
                 initLists(cursor);
             }
-            adapter.setCurrentViewDate(dateOnTitleTV);
+            mViewHolderAdapter.setCurrentViewDate(dateOnTitleTV);
         } else {
             clearAllListData();
             updateDateTv(cal.getTime());
-            adapter.setCurrentViewDate(dateOnTitleTV);
+            mViewHolderAdapter.setCurrentViewDate(dateOnTitleTV);
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No DATA for " + dateTitleTV.getText(), Toast.LENGTH_SHORT);
             toast.show();
@@ -428,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             addNewExBtn.setVisibility(View.VISIBLE);
         }
-        adapter.notifyDataSetChanged();
+        mViewHolderAdapter.notifyDataSetChanged();
     }
 
     private void clearAllListData() {
@@ -443,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean initTodayData() {
         setTodayData();
-        adapter.notifyDataSetChanged();
+        mViewHolderAdapter.notifyDataSetChanged();
         return true;
     }
 
@@ -472,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.println(Log.DEBUG, "SELECT: ", cursor.getString(cursor.getColumnIndex("_date")));
             }
         }
-        adapter.notifyDataSetChanged();
+        mViewHolderAdapter.notifyDataSetChanged();
         updateDateTv(new Date());
     }
 
@@ -513,21 +497,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateLabel(Date foDate) {
-        //if (getDataForDate(foDate)) {
         dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
-        //}
     }
 
     public void onOpenChartsView(View view) {
         Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
         cal.setTime(dateOnTitleTV);// all done
-
         ChartsActivityIntent.putExtra("dateRange", cal.toString()); //Optional parameters
         MainActivity.this.startActivity(ChartsActivityIntent);
-
     }
-
 }

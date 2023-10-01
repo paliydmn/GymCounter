@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/exNameET"
+        android:id="@+id/exNameEditT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -30,7 +30,7 @@
         app:layout_constraintTop_toBottomOf="@+id/addExToSetTV" />
 
     <EditText
-        android:id="@+id/exDescrET"
+        android:id="@+id/exDescrEditT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -40,5 +40,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exNameET" />
+        app:layout_constraintTop_toBottomOf="@+id/exNameEditT" />
 </androidx.constraintlayout.widget.ConstraintLayout>
