@@ -160,4 +160,44 @@ public class DBManager {
         }
         return cursor;
     }
+
+    public void deleteSetByName(String set_name) {
+        String deleteSet = String.format("DELETE FROM exercise WHERE id IN (SELECT id from exercise where set_id = (SELECT id FROM sets where set_name='%s'));\n" +
+                "DELETE FROM sets where set_name='%s';", set_name, set_name);
+        //    database.execSQL(deleteSet);
+
+
+        //  Cursor c = database.rawQuery(del_ex, null);
+        //   Cursor c2 = database.rawQuery(deleteSet, null);
+        // System.out.println(c);
+/*
+SELECT id from exercise where set_id = (SELECT id FROM sets where set_name='Biceps');
+DELETE FROM exercise WHERE id In (1, 2, 3, 4, 5);
+DELETE from sets WHERE set_name = 'Biceps';
+ */
+
+        String select_ids = String.format("SELECT id from exercise where set_id = (SELECT id FROM sets where set_name='%s');", set_name);
+        Cursor c = database.rawQuery(select_ids, null);
+
+        StringBuffer ids = new StringBuffer();
+        if (c.getCount() >= 1) {
+            while (c.moveToNext()) {
+                String id = c.getString(c.getColumnIndex("id"));
+                ids.append(id).append(", ");
+                System.out.println(id);
+            }
+        }
+
+        String del_ex = null;
+        if (!ids.toString().equals("")) {
+            del_ex = String.format("DELETE FROM exercise WHERE id IN (%s);", ids.deleteCharAt(ids.length() - 2).toString());
+            System.out.println(del_ex);
+            database.execSQL(del_ex);
+
+        }
+        String del_set = String.format("DELETE FROM sets where set_name='%s';", set_name);
+
+        database.execSQL(del_set);
+    }
+
 }

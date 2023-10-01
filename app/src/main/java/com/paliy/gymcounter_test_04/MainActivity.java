@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
 
+    ImageView trashImB;
 
     ExpandableListView.OnChildClickListener myOnChildClickListener = new ExpandableListView.OnChildClickListener() {
 
@@ -117,12 +119,23 @@ public class MainActivity extends AppCompatActivity {
             TextView addNewSet = v.findViewById(R.id.addNewExTVBtn);
             textGroup.setSingleLine(true);
 
+            trashImB = v.findViewById(R.id.trashImB);
+
             String set_name = (String) textGroup.getText();
             addNewSet.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     System.out.println("ADD NEW Ex!");
                     dbManager.insertNewExToSetRaw(set_name, "1 Pupa Sq", "do like a boss! ", 0);
+                    refreshExListView();
+                }
+            });
+
+            trashImB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("DELETE SET");
+                    dbManager.deleteSetByName(set_name);
                     refreshExListView();
                 }
             });
@@ -151,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
         // Add new Ex to SET at Expandable List
         addNewSetTVBtn = findViewById(R.id.addNewSetTVBtn);
-
         navigationView = findViewById(R.id.navigationView);
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
