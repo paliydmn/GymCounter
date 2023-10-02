@@ -3,6 +3,7 @@ package com.paliy.gymcounter_test_04;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -16,16 +17,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,43 +51,38 @@ public class MainActivity extends AppCompatActivity {
     final Calendar myCalendar = Calendar.getInstance();
     NavigationView navigationView;
     RecyclerView recyclerView;
-    List<String> titleList;
-    List<String> countList;
-    ImageButton dateBeforeBtn;
-    ImageButton dateAfterBtn;
-    TextView dateTitleTV;
+    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
+        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
+
+//        Toast.makeText(v.getContext(), "onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition),  Toast.LENGTH_SHORT).show();
+//        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
+
+        return true;
+    };
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
+        // group collapse at groupPosition
+        System.out.println("OnGroupCollapseListener");
+    };
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
+        // group expand at groupPosition
+        System.out.println("OnGroupExpandListener");
+    };
+    private List<String> titleList;
+    private List<String> countList;
+    private TextView dateTitleTV;
     final DatePickerDialog.OnDateSetListener date = (view, year, month, day) -> {
         myCalendar.set(Calendar.YEAR, year);
         myCalendar.set(Calendar.MONTH, month);
         myCalendar.set(Calendar.DAY_OF_MONTH, day);
         updateLabel(myCalendar.getTime());
     };
-    TextView addNewSetTVBtn;
-    FloatingActionButton addNewExBtn;
-    Date dateOnTitleTV;
-    Adapter mViewHolderAdapter;
-    DrawerLayout drawerLayout;
-    MainActivity activity_main;
-    Toolbar toolbar;
-
-    ExpListAdapter expandableListAdapter;
-    List<String> expandableListTitle;
-    HashMap<String, List<String>> expandableListDetail;
-    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
-        System.out.println("onChildClick");
-
-        return true;
-    };
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
-        // group collapse at groupPosition
-
-        System.out.println("OnGroupCollapseListener");
-    };
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
-        // group expand at groupPosition
-        System.out.println("OnGroupExpandListener");
-
-    };
+    private TextView addNewSetTVBtn;
+    private FloatingActionButton addNewExBtn;
+    private Date dateOnTitleTV;
+    private Adapter mViewHolderAdapter;
+    private ExpListAdapter expandableListAdapter;
+    private List<String> expandableListTitle;
+    private HashMap<String, List<String>> expandableListDetail;
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
     ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
@@ -100,12 +93,12 @@ public class MainActivity extends AppCompatActivity {
                                     int groupPosition, long id) {
             System.out.println("OnGroupClickListener");
             TextView textGroup = v.findViewById(R.id.textGroup);
-            TextView addNewSet = v.findViewById(R.id.addNewExTVBtn);
+            TextView addNewEx = v.findViewById(R.id.addNewExTVBtn);
             textGroup.setSingleLine(true);
             ImageView trashImB = v.findViewById(R.id.trashImB);
             String set_name = (String) textGroup.getText();
-
-            addNewSet.setOnClickListener(view -> {
+//Add New Ex to current SET
+            addNewEx.setOnClickListener(view -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
                 LayoutInflater inflater = getLayoutInflater();
                 final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
@@ -132,10 +125,26 @@ public class MainActivity extends AppCompatActivity {
                 builder.show();
             });
 
+//Delete Set with all exercises.
             trashImB.setOnClickListener(view -> {
-                System.out.println("DELETE SET");
-                dbManager.deleteSetByName(set_name);
-                refreshExListView();
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                System.out.println("DELETE SET");
+                                dbManager.deleteSetByName(set_name);
+                                refreshExListView();
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
             });
             return false;
         }
@@ -145,9 +154,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View view) {
             AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
             LayoutInflater inflater = getLayoutInflater();
-            // Inflate and set the layout for the dialog
             final View dialogView = inflater.inflate(R.layout.new_set_form, null);
-            // Pass null as the parent view because its going in the dialog layout
             builder.setView(dialogView)
                     .setPositiveButton("Add", (dialog, id) -> {
                         EditText set_name = dialogView.findViewById(R.id.setNameEdText);
@@ -176,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
         return cal;
     }
 
+
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,8 +193,6 @@ public class MainActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
 
         recyclerView = findViewById(R.id.recyclerView);
-        dateAfterBtn = findViewById(R.id.btnRightDate);
-        dateBeforeBtn = findViewById(R.id.btnLeftDate);
         //ToDo addNewExBtn = findViewById(R.id.addNewItemFABtn); should add new Ex to currently selected SET.
         addNewExBtn = findViewById(R.id.addNewItemFABtn);
         // Add new Ex to SET at Expandable List
@@ -197,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
         int width = displaymetrics.widthPixels;
 
         navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width * 0.75), ViewGroup.LayoutParams.MATCH_PARENT));
-        activity_main = this;
         dateTitleTV = findViewById(R.id.tvDate);
 
         titleList = new ArrayList<>();
@@ -223,6 +229,18 @@ public class MainActivity extends AppCompatActivity {
         expandableListView.setOnGroupClickListener(myOnGroupClickListener);
         expandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
         expandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
+
+        expandableListAdapter.setOnClickHandler(new AdapterOnClickHandler() {
+            @Override
+            public void onClick(String action, String groupName, String childName) {
+                System.out.println(action.toUpperCase());
+                System.out.println("Here! ->" +  groupName + " -> "+ childName);
+                if (action.equals("delete")){
+                    dbManager.deleteExByExNameSetName(childName, groupName);
+                    refreshExListView();
+                }
+            }
+        });
 
         mViewHolderAdapter = new Adapter(this, titleList, countList, listener);
 
@@ -333,7 +351,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private HashMap<String, List<String>> initExpList() {
-
         HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
         Cursor cursor = dbManager.selectTest();
         List<String> exChildItem;
@@ -343,7 +360,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("SETS = " + set_name);
                 Cursor cursor2 = dbManager.selectExs(set_name);
                 exChildItem = new ArrayList<String>();
-
                 if (cursor2.getCount() >= 1) {
                     while (cursor2.moveToNext()) {
                         String ex_name = cursor2.getString(cursor2.getColumnIndex("ex_name"));

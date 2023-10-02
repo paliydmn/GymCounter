@@ -270,7 +270,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                             case DialogInterface.BUTTON_POSITIVE:
                                 try {
                                     dbManager.open();
-                                    int res = dbManager.delete((String) titleTV.getText(), currentViewDate);
+                                    int res = dbManager.deleteExFromMainByTitleDate((String) titleTV.getText(), currentViewDate);
                                     if (res == 1) {
                                         Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
                                         titleList.remove(mTitleTV);

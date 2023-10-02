@@ -115,17 +115,17 @@ public class DBManager {
         return true;
     }
 
-    public int delete(String title, Date date) {
+    public int deleteExFromMainByTitleDate(String title, Date date) {
         return database.delete(DBHelper.MAIN_TABLE_NAME, DBHelper.TITLE + " = '" + title + "' AND _date = '" + dateFormat.format(date) + "'", null);
     }
 
     //Todo check for UNIQUE constraint set_name
-    public void insertNewSet(String set_name, int status) {
+    public boolean insertNewSet(String set_name, int status) {
         ContentValues contentValue = new ContentValues();
         contentValue.put(DBHelper.SET_NAME, set_name);
         contentValue.put(DBHelper.STATUS, status);
         long res = database.insert(DBHelper.SETS_TABLE_NAME, null, contentValue);
-        System.out.println(res);
+        return (res >= 0) ? true : false;
     }
 
     public void insertNewExToSetRaw(String set_name, String ex_name, String ex_descr, int status) {
@@ -161,15 +161,8 @@ public class DBManager {
         return cursor;
     }
 
+
     public void deleteSetByName(String set_name) {
-        String deleteSet = String.format("DELETE FROM exercise WHERE id IN (SELECT id from exercise where set_id = (SELECT id FROM sets where set_name='%s'));\n" +
-                "DELETE FROM sets where set_name='%s';", set_name, set_name);
-        //    database.execSQL(deleteSet);
-
-
-        //  Cursor c = database.rawQuery(del_ex, null);
-        //   Cursor c2 = database.rawQuery(deleteSet, null);
-        // System.out.println(c);
 /*
 SELECT id from exercise where set_id = (SELECT id FROM sets where set_name='Biceps');
 DELETE FROM exercise WHERE id In (1, 2, 3, 4, 5);
@@ -200,4 +193,8 @@ DELETE from sets WHERE set_name = 'Biceps';
         database.execSQL(del_set);
     }
 
+    public void deleteExByExNameSetName(String ex_name, String set_name) {
+        String deleteExFromSet = String.format("DELETE FROM exercise WHERE ex_name = '%s' AND set_id = (select id from sets where set_name = '%s');", ex_name, set_name);
+        database.execSQL(deleteExFromSet);
+    }
 }
