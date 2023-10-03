@@ -47,34 +47,10 @@ public class MainActivity extends AppCompatActivity {
     private static final SimpleDateFormat TITLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy");
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
+    private int lastExpandedPosition = -1;
     NavigationView navigationView;
     RecyclerView recyclerView;
-    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
-        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
 
-//        Toast.makeText(v.getContext(), "onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition),  Toast.LENGTH_SHORT).show();
-//        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
-
-        return true;
-    };
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
-        // group collapse at groupPosition
-        System.out.println("OnGroupCollapseListener");
-    };
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
-        // group expand at groupPosition
-        System.out.println("OnGroupExpandListener");
-    };
-    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
-
-        @RequiresApi(api = Build.VERSION_CODES.Q)
-        @Override
-        public boolean onGroupClick(ExpandableListView parent, View v,
-                                    int groupPosition, long id) {
-            System.out.println("OnGroupClickListener");
-            return false;
-        }
-    };
     private List<String> titleList;
     private List<String> countList;
     private TextView dateTitleTV;
@@ -89,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton addNewExBtn;
     private Date dateOnTitleTV;
     private Adapter mViewHolderAdapter;
+    private ExpandableListView expandableListView;
     private ExpListAdapter expandableListAdapter;
     private List<String> expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
@@ -163,13 +140,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Expandable List View block
-        ExpandableListView expandableListView = findViewById(R.id.exListView);
+        expandableListView = findViewById(R.id.exListView);
         //Init exList with data from db and update
         expandableListDetail = initExpList();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new ExpListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-//        expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(myOnChildClickListener);
         expandableListView.setOnGroupClickListener(myOnGroupClickListener);
         expandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
@@ -513,6 +489,37 @@ public class MainActivity extends AppCompatActivity {
     private void updateLabel(Date foDate) {
         dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
     }
+
+    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
+        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
+
+//        Toast.makeText(v.getContext(), "onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition),  Toast.LENGTH_SHORT).show();
+//        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
+
+        return true;
+    };
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
+        // group collapse at groupPosition
+        System.out.println("OnGroupCollapseListener");
+    };
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
+        // group expand at groupPosition
+        if ((lastExpandedPosition != -1) && (groupPosition != lastExpandedPosition)) {
+            expandableListView.collapseGroup(lastExpandedPosition);
+        }
+        lastExpandedPosition = groupPosition;
+        System.out.println("OnGroupExpandListener");
+    };
+    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
+
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                                    int groupPosition, long id) {
+            System.out.println("OnGroupClickListener");
+            return false;
+        }
+    };
 
     public void onOpenChartsView(View view) {
         Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);

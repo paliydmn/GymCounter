@@ -30,12 +30,14 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
     private HashMap<String, List<String>> _listDataChild;
 
     private AdapterOnClickHandler handler;
+    InputMethodManager imm;// = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
     public ExpListAdapter(Context context, List<String> expandableListTitle,
                           HashMap<String, List<String>> _listDataChild) {
         this.context = context;
         this._listDataHeader = expandableListTitle;
         this._listDataChild = _listDataChild;
+        imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
     public void setOnClickHandler(AdapterOnClickHandler handler) {
@@ -98,6 +100,9 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
                 } else {
                     textChild.setVisibility(View.GONE);
                     editTextChild.setVisibility(View.VISIBLE);
+                    editTextChild.requestFocus();
+                    editTextChild.setSelection(editTextChild.getText().length());
+                    imm.showSoftInput(editTextChild, InputMethodManager.SHOW_IMPLICIT);
                     editExBtn.setBackgroundResource(R.drawable.enter_changes_light_2);
                 }
             }
@@ -174,12 +179,14 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
                 editSetImBtn.setBackgroundResource(R.drawable.edit_pen);
                 setNameTV.setVisibility(View.VISIBLE);
                 editSetNameEdT.setVisibility(View.GONE);
-                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 handler.onClick(EDIT_SET, set_name, editedSetNameVal, set_name);
             } else {
                 setNameTV.setVisibility(View.INVISIBLE);
                 editSetNameEdT.setVisibility(View.VISIBLE);
+                editSetNameEdT.requestFocus();
+                editSetNameEdT.setSelection(editSetNameEdT.getText().length());
+                imm.showSoftInput(editSetNameEdT, InputMethodManager.SHOW_IMPLICIT);
                 editSetImBtn.setBackgroundResource(R.drawable.enter_changes_light_2);
             }
         });
