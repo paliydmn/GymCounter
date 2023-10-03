@@ -197,4 +197,16 @@ DELETE from sets WHERE set_name = 'Biceps';
         String deleteExFromSet = String.format("DELETE FROM exercise WHERE ex_name = '%s' AND set_id = (select id from sets where set_name = '%s');", ex_name, set_name);
         database.execSQL(deleteExFromSet);
     }
+
+    public void editExByExNameSetName(String newNameCh, String setName, String oldNameCh) {
+        //UPDATE exercise SET ex_name = 'new_name' where set_id = (SELECT id FROM sets where set_name = 'set_name') and ex_name = 'Old_name';
+        String editExSql = String.format("UPDATE exercise SET ex_name = '%s' where set_id = (SELECT id FROM sets where set_name = '%s') and ex_name = '%s';", newNameCh, setName, oldNameCh);
+        database.execSQL(editExSql);
+    }
+
+    public void editSetNameByName(String newName, String oldName) {
+        //UPDATE exercise SET ex_name = 'new_name' where set_id = (SELECT id FROM sets where set_name = 'set_name') and ex_name = 'Old_name';
+        String editExSql = String.format("UPDATE sets SET set_name = '%s' where set_name = '%s';", newName, oldName);
+        database.execSQL(editExSql);
+    }
 }

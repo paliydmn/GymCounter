@@ -3,7 +3,6 @@ package com.paliy.gymcounter_test_04;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -17,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +65,73 @@ public class MainActivity extends AppCompatActivity {
         // group expand at groupPosition
         System.out.println("OnGroupExpandListener");
     };
+    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
+
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                                    int groupPosition, long id) {
+
+
+            System.out.println("OnGroupClickListener");
+//            TextView textGroup = v.findViewById(R.id.textGroup);
+//            TextView addNewEx = v.findViewById(R.id.addNewExTVBtn);
+//            textGroup.setSingleLine(true);
+//            ImageView trashImB = v.findViewById(R.id.trashImB);
+//            String set_name = (String) textGroup.getText();
+////Add New Ex to current SET
+//
+//            addNewEx.setOnClickListener(view -> {
+//                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+//                LayoutInflater inflater = getLayoutInflater();
+//                final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
+//                // Pass null as the parent view because its going in the dialog layout
+//                builder.setView(dialogView)
+//                        .setPositiveButton("Add", (dialog, id1) -> {
+//                            EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
+//                            EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
+//                            //#ToDo check is empty, check if exists - do not create
+//                            if (!ex_name.getText().toString().isEmpty()) {
+//                                System.out.println("ADD NEW Ex!");
+//                                dbManager.insertNewExToSetRaw(set_name, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
+//                                refreshExListView();
+//                                //#Todo If insert success refresh expandableListView
+//                                refreshExListView();
+//                            } else {
+//                                Toast.makeText(getApplicationContext(),
+//                                        "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", (dialog, id1) -> {
+//                        });
+//                builder.create();
+//                builder.show();
+//            });
+//
+////Delete Set with all exercises.
+//            trashImB.setOnClickListener(view -> {
+//                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        switch (which) {
+//                            case DialogInterface.BUTTON_POSITIVE:
+//                                System.out.println("DELETE SET");
+//                                dbManager.deleteSetByName(set_name);
+//                                refreshExListView();
+//                                break;
+//                            case DialogInterface.BUTTON_NEGATIVE:
+//                                break;
+//                        }
+//                    }
+//                };
+//
+//                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+//                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+//                        .setNegativeButton("No", dialogClickListener).show();
+//            });
+            return false;
+        }
+    };
     private List<String> titleList;
     private List<String> countList;
     private TextView dateTitleTV;
@@ -85,70 +150,6 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, List<String>> expandableListDetail;
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
-    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
-
-        @RequiresApi(api = Build.VERSION_CODES.Q)
-        @Override
-        public boolean onGroupClick(ExpandableListView parent, View v,
-                                    int groupPosition, long id) {
-            System.out.println("OnGroupClickListener");
-            TextView textGroup = v.findViewById(R.id.textGroup);
-            TextView addNewEx = v.findViewById(R.id.addNewExTVBtn);
-            textGroup.setSingleLine(true);
-            ImageView trashImB = v.findViewById(R.id.trashImB);
-            String set_name = (String) textGroup.getText();
-//Add New Ex to current SET
-            addNewEx.setOnClickListener(view -> {
-                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-                LayoutInflater inflater = getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
-                // Pass null as the parent view because its going in the dialog layout
-                builder.setView(dialogView)
-                        .setPositiveButton("Add", (dialog, id1) -> {
-                            EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
-                            EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
-                            //#ToDo check is empty, check if exists - do not create
-                            if (!ex_name.getText().toString().isEmpty()) {
-                                System.out.println("ADD NEW Ex!");
-                                dbManager.insertNewExToSetRaw(set_name, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
-                                refreshExListView();
-                                //#Todo If insert success refresh expandableListView
-                                refreshExListView();
-                            } else {
-                                Toast.makeText(getApplicationContext(),
-                                        "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setNegativeButton("Cancel", (dialog, id1) -> {
-                        });
-                builder.create();
-                builder.show();
-            });
-
-//Delete Set with all exercises.
-            trashImB.setOnClickListener(view -> {
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                System.out.println("DELETE SET");
-                                dbManager.deleteSetByName(set_name);
-                                refreshExListView();
-                                break;
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                break;
-                        }
-                    }
-                };
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                        .setNegativeButton("No", dialogClickListener).show();
-            });
-            return false;
-        }
-    };
     View.OnClickListener onAddNewSetListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -182,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
         cal.add(Calendar.DATE, i);
         return cal;
     }
-
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -232,12 +232,53 @@ public class MainActivity extends AppCompatActivity {
 
         expandableListAdapter.setOnClickHandler(new AdapterOnClickHandler() {
             @Override
-            public void onClick(String action, String groupName, String childName) {
-                System.out.println(action.toUpperCase());
-                System.out.println("Here! ->" +  groupName + " -> "+ childName);
-                if (action.equals("delete")){
-                    dbManager.deleteExByExNameSetName(childName, groupName);
-                    refreshExListView();
+            public void onClick(OnClickActions action, String setName, String newName, String old_name) {
+                System.out.println(action);
+                System.out.println("Here! ->" + setName + " -> " + newName);
+                switch (action) {
+                    case DELETE_EXERCISE:
+                        dbManager.deleteExByExNameSetName(newName, setName);
+                        refreshExListView();
+                        break;
+                    case EDIT_EXERCISE:
+                        dbManager.editExByExNameSetName(newName, setName, old_name);
+                        refreshExListView();
+                        break;
+                    case CREATE_EXERCISE:
+                        //Add New Ex to current SET
+                        AlertDialog.Builder builder = new AlertDialog.Builder(navigationView.getContext());
+                        LayoutInflater inflater = getLayoutInflater();
+                        final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
+                        // Pass null as the parent view because its going in the dialog layout
+                        builder.setView(dialogView)
+                                .setPositiveButton("Add", (dialog, id1) -> {
+                                    EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
+                                    EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
+                                    //#ToDo check is empty, check if exists - do not create
+                                    if (!ex_name.getText().toString().isEmpty()) {
+                                        System.out.println("ADD NEW Ex!");
+                                        dbManager.insertNewExToSetRaw(setName, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
+                                        refreshExListView();
+                                        //#Todo If insert success refresh expandableListView
+                                        refreshExListView();
+                                    } else {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .setNegativeButton("Cancel", (dialog, id1) -> {
+                                });
+                        builder.create();
+                        builder.show();
+                        break;
+                    case DELETE_SET:
+                        dbManager.deleteSetByName(setName);
+                        refreshExListView();
+                        break;
+                    case EDIT_SET:
+                        dbManager.editSetNameByName(newName, old_name);
+                        refreshExListView();
+                        break;
                 }
             }
         });

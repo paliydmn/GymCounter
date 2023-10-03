@@ -36,6 +36,7 @@
     <string name="add">Add</string>
     <string name="set">Set</string>
     <string name="sets">Sets</string>
+    <string name="set_name">set name</string>
 
 
 </resources>

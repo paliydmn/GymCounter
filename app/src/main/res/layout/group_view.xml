@@ -7,9 +7,9 @@
     >
 
     <TextView
-        android:id="@+id/textGroup"
+        android:id="@+id/setNameTV"
         android:layout_width="170dp"
-        android:layout_height="28dp"
+        android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:layout_weight="1"
@@ -17,11 +17,29 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:text="this is a long text for test"
+        android:text="@string/set_name"
         android:textAlignment="textStart"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editSetNameEdT"
+        android:layout_width="170dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text=""
+        android:textAlignment="textStart"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,33 +52,34 @@
         android:textColor="@color/white"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/editImB"
-        app:layout_constraintHorizontal_bias="0.658"
-        app:layout_constraintStart_toEndOf="@+id/textGroup"
+        app:layout_constraintEnd_toStartOf="@+id/applySetImB"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/setNameTV"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageButton2"
+        android:id="@+id/editSetImBtn"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:focusable="false"
-        android:src="@drawable/edit_pen"
+        android:background="@drawable/edit_pen"
         app:layout_constraintEnd_toStartOf="@+id/trashImB"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/editImB"
+        android:id="@+id/applySetImB"
         android:layout_width="28dp"
         android:layout_height="28dp"
+        android:layout_marginStart="84dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
+        android:background="@drawable/submit_apply"
         android:focusable="false"
-        android:src="@drawable/submit_apply"
-        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
+        app:layout_constraintEnd_toStartOf="@+id/editSetImBtn"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/textGroup"
+        app:layout_constraintStart_toEndOf="@+id/setNameTV"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView

@@ -1,32 +1,44 @@
 package com.paliy.gymcounter_test_04;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpListAdapter extends BaseExpandableListAdapter implements AdapterOnClickHandler{
+import static com.paliy.gymcounter_test_04.OnClickActions.CREATE_EXERCISE;
+import static com.paliy.gymcounter_test_04.OnClickActions.DELETE_EXERCISE;
+import static com.paliy.gymcounter_test_04.OnClickActions.DELETE_SET;
+import static com.paliy.gymcounter_test_04.OnClickActions.EDIT_EXERCISE;
+import static com.paliy.gymcounter_test_04.OnClickActions.EDIT_SET;
+import static com.paliy.gymcounter_test_04.OnClickActions.SUBMIT_SET_TO_MAIN_VIEW;
+
+public class ExpListAdapter extends BaseExpandableListAdapter implements AdapterOnClickHandler {
 
     private Context context;
     private List<String> _listDataHeader;
     private HashMap<String, List<String>> _listDataChild;
 
     private AdapterOnClickHandler handler;
-    public void setOnClickHandler(AdapterOnClickHandler handler) {
-        this.handler = handler;
-    }
+
     public ExpListAdapter(Context context, List<String> expandableListTitle,
                           HashMap<String, List<String>> _listDataChild) {
         this.context = context;
         this._listDataHeader = expandableListTitle;
         this._listDataChild = _listDataChild;
+    }
+
+    public void setOnClickHandler(AdapterOnClickHandler handler) {
+        this.handler = handler;
     }
 
     public void setNewItems(List<String> listDataHeader, HashMap<String, List<String>> listChildData) {
@@ -51,31 +63,48 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
 
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.child_view, null);
         }
 
+        EditText editTextChild = (EditText) convertView.findViewById(R.id.editTextChild);
+
         TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
+
+        editTextChild.setText(expandedListText);
         textChild.setText(expandedListText);
-        Button editEx = (Button) convertView.findViewById(R.id.editListChildItemButton);
-        Button deleteEx = (Button) convertView.findViewById(R.id.deleteListChildItemButton);
+        Button editExBtn = (Button) convertView.findViewById(R.id.editListChildItemButton);
+        Button deleteExBtn = (Button) convertView.findViewById(R.id.deleteListChildItemButton);
 
 //hook for handling on click on elements, forward onclick to Main activity
-        editEx.setOnClickListener(new View.OnClickListener() {
+
+        editExBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "EDIT button is pressed", Toast.LENGTH_SHORT).show();
-                String editAction = "edit";
-                handler.onClick(editAction, getGroup(listPosition).toString(), expandedListText);
+                //#ToDo code review is need to cleanup it
+                String editedVal = editTextChild.getText().toString();
+                textChild.setText(editedVal);
+                _listDataChild.get(_listDataHeader.get(listPosition)).set(expandedListPosition, editedVal);
+                if (editTextChild.getVisibility() == View.VISIBLE) {
+                    editExBtn.setBackgroundResource(R.drawable.edit_pen);
+                    textChild.setVisibility(View.VISIBLE);
+                    editTextChild.setVisibility(View.GONE);
+                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    handler.onClick(EDIT_EXERCISE, getGroup(listPosition).toString(), editedVal, expandedListText);
+                } else {
+                    textChild.setVisibility(View.GONE);
+                    editTextChild.setVisibility(View.VISIBLE);
+                    editExBtn.setBackgroundResource(R.drawable.enter_changes_light_2);
+                }
             }
         });
-
-        deleteEx.setOnClickListener(new View.OnClickListener() {
+        deleteExBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              //  Toast.makeText(view.getContext(), "EDIT button is pressed: " + getGroup(listPosition) +" ->  "+ getGroup(listPosition), Toast.LENGTH_SHORT).show();
-                handler.onClick("delete", getGroup(listPosition).toString(), expandedListText );
+                handler.onClick(DELETE_EXERCISE, getGroup(listPosition).toString(), expandedListText, expandedListText);
             }
         });
 
@@ -106,13 +135,66 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
     @Override
     public View getGroupView(int listPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String listTitle = (String) getGroup(listPosition);
+        String set_name = (String) getGroup(listPosition);
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.group_view, null);
         }
-        TextView listTitleTextView = (TextView) convertView.findViewById(R.id.textGroup);
-        listTitleTextView.setText(listTitle);
+        TextView setNameTV = (TextView) convertView.findViewById(R.id.setNameTV);
+        EditText editSetNameEdT = convertView.findViewById(R.id.editSetNameEdT);
+        setNameTV.setText(set_name);
+        editSetNameEdT.setText(set_name);
+
+        TextView addNewExBtn = convertView.findViewById(R.id.addNewExTVBtn);
+        ImageView trashImBtn = convertView.findViewById(R.id.trashImB);
+        ImageView editSetImBtn = convertView.findViewById(R.id.editSetImBtn);
+        ImageView applySetImBtn = convertView.findViewById(R.id.applySetImB);
+
+        editSetImBtn.setOnClickListener(view -> {
+            String editedSetNameVal = editSetNameEdT.getText().toString();
+            setNameTV.setText(editedSetNameVal);
+            if (editSetNameEdT.getVisibility() == View.VISIBLE) {
+                editSetImBtn.setBackgroundResource(R.drawable.edit_pen);
+                setNameTV.setVisibility(View.VISIBLE);
+                editSetNameEdT.setVisibility(View.GONE);
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                handler.onClick(EDIT_SET, set_name, editedSetNameVal, set_name);
+            } else {
+                setNameTV.setVisibility(View.INVISIBLE);
+                editSetNameEdT.setVisibility(View.VISIBLE);
+                editSetImBtn.setBackgroundResource(R.drawable.enter_changes_light_2);
+            }
+        });
+//Add New Ex to current SET
+        addNewExBtn.setOnClickListener(view -> {
+            handler.onClick(CREATE_EXERCISE, set_name, null, null);
+        });
+//Delete Set with all exercises.
+        trashImBtn.setOnClickListener(view -> {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            handler.onClick(DELETE_SET, set_name, null, null);
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+            builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        });
+
+        applySetImBtn.setOnClickListener(view -> {
+            //ToDo Apply Set to main view
+            handler.onClick(SUBMIT_SET_TO_MAIN_VIEW, set_name, null, null);
+
+        });
         return convertView;
     }
 
@@ -127,7 +209,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
     }
 
     @Override
-    public void onClick(String action, String groupName, String childName) {
+    public void onClick(OnClickActions action, String groupName, String childName, String old_name) {
 
     }
 }
