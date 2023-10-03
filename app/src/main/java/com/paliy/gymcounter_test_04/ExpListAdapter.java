@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,7 +25,7 @@ import static com.paliy.gymcounter_test_04.OnClickActions.SUBMIT_SET_TO_MAIN_VIE
 
 public class ExpListAdapter extends BaseExpandableListAdapter implements AdapterOnClickHandler {
 
-    private Context context;
+    private final Context context;
     private List<String> _listDataHeader;
     private HashMap<String, List<String>> _listDataChild;
 
@@ -69,14 +70,14 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
             convertView = inflater.inflate(R.layout.child_view, null);
         }
 
-        EditText editTextChild = (EditText) convertView.findViewById(R.id.editTextChild);
+        EditText editTextChild = convertView.findViewById(R.id.editTextChild);
 
-        TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
+        TextView textChild = convertView.findViewById(R.id.textChild);
 
         editTextChild.setText(expandedListText);
         textChild.setText(expandedListText);
-        Button editExBtn = (Button) convertView.findViewById(R.id.editListChildItemButton);
-        Button deleteExBtn = (Button) convertView.findViewById(R.id.deleteListChildItemButton);
+        Button editExBtn = convertView.findViewById(R.id.editListChildItemButton);
+        Button deleteExBtn = convertView.findViewById(R.id.deleteListChildItemButton);
 
 //hook for handling on click on elements, forward onclick to Main activity
 
@@ -104,7 +105,23 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
         deleteExBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handler.onClick(DELETE_EXERCISE, getGroup(listPosition).toString(), expandedListText, expandedListText);
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                handler.onClick(DELETE_EXERCISE, getGroup(listPosition).toString(), expandedListText, expandedListText);
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
             }
         });
 
@@ -140,7 +157,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter implements Adapter
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.group_view, null);
         }
-        TextView setNameTV = (TextView) convertView.findViewById(R.id.setNameTV);
+        TextView setNameTV = convertView.findViewById(R.id.setNameTV);
         EditText editSetNameEdT = convertView.findViewById(R.id.editSetNameEdT);
         setNameTV.setText(set_name);
         editSetNameEdT.setText(set_name);

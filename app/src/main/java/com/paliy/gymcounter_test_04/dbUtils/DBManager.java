@@ -209,4 +209,11 @@ DELETE from sets WHERE set_name = 'Biceps';
         String editExSql = String.format("UPDATE sets SET set_name = '%s' where set_name = '%s';", newName, oldName);
         database.execSQL(editExSql);
     }
+
+    public void insertSetMain(String setName) {
+        //UPDATE exercise SET ex_name = 'new_name' where set_id = (SELECT id FROM sets where set_name = 'set_name') and ex_name = 'Old_name';
+        String editExSql = String.format("INSERT INTO main (title, counter, description, _date) " +
+                "SELECT ex_name as title, 0, description, date() from exercise where set_id = (SELECT id from sets where set_name='%s')", setName);
+        database.execSQL(editExSql);
+    }
 }

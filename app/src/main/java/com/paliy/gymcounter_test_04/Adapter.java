@@ -120,8 +120,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 try {
                     dbManager.open();
                     dbManager.updateAddCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate, " ");
-//                    notifyDataSetChanged();
-
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
@@ -247,10 +245,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                                 boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newTitle, newDescr, currentViewDate);
                                 if (res) {
                                     Toast.makeText(view1.getContext(), newTitle + " Edited!", Toast.LENGTH_SHORT).show();
-                                    //titleList.set(titleList.indexOf(mTitleTV), newTitle);
                                     titleTV.setText(newTitle);
-                                    //ToDo BUG card counter resets after notifyDataSetChanged(); seems to be fixed
-                                    //notifyDataSetChanged();
                                 }
                             }
                         } catch (SQLException throwable) {

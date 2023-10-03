@@ -71,64 +71,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onGroupClick(ExpandableListView parent, View v,
                                     int groupPosition, long id) {
-
-
             System.out.println("OnGroupClickListener");
-//            TextView textGroup = v.findViewById(R.id.textGroup);
-//            TextView addNewEx = v.findViewById(R.id.addNewExTVBtn);
-//            textGroup.setSingleLine(true);
-//            ImageView trashImB = v.findViewById(R.id.trashImB);
-//            String set_name = (String) textGroup.getText();
-////Add New Ex to current SET
-//
-//            addNewEx.setOnClickListener(view -> {
-//                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-//                LayoutInflater inflater = getLayoutInflater();
-//                final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
-//                // Pass null as the parent view because its going in the dialog layout
-//                builder.setView(dialogView)
-//                        .setPositiveButton("Add", (dialog, id1) -> {
-//                            EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
-//                            EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
-//                            //#ToDo check is empty, check if exists - do not create
-//                            if (!ex_name.getText().toString().isEmpty()) {
-//                                System.out.println("ADD NEW Ex!");
-//                                dbManager.insertNewExToSetRaw(set_name, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
-//                                refreshExListView();
-//                                //#Todo If insert success refresh expandableListView
-//                                refreshExListView();
-//                            } else {
-//                                Toast.makeText(getApplicationContext(),
-//                                        "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
-//                            }
-//                        })
-//                        .setNegativeButton("Cancel", (dialog, id1) -> {
-//                        });
-//                builder.create();
-//                builder.show();
-//            });
-//
-////Delete Set with all exercises.
-//            trashImB.setOnClickListener(view -> {
-//                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        switch (which) {
-//                            case DialogInterface.BUTTON_POSITIVE:
-//                                System.out.println("DELETE SET");
-//                                dbManager.deleteSetByName(set_name);
-//                                refreshExListView();
-//                                break;
-//                            case DialogInterface.BUTTON_NEGATIVE:
-//                                break;
-//                        }
-//                    }
-//                };
-//
-//                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-//                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-//                        .setNegativeButton("No", dialogClickListener).show();
-//            });
             return false;
         }
     };
@@ -142,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         updateLabel(myCalendar.getTime());
     };
     private TextView addNewSetTVBtn;
+    private TextView titleOnMainTV;
     private FloatingActionButton addNewExBtn;
     private Date dateOnTitleTV;
     private Adapter mViewHolderAdapter;
@@ -205,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView.setLayoutParams(new ConstraintLayout.LayoutParams((int) (width * 0.75), ViewGroup.LayoutParams.MATCH_PARENT));
         dateTitleTV = findViewById(R.id.tvDate);
+        titleOnMainTV = findViewById(R.id.titleOnMainTV);
 
         titleList = new ArrayList<>();
         countList = new ArrayList<>();
@@ -278,6 +223,13 @@ public class MainActivity extends AppCompatActivity {
                     case EDIT_SET:
                         dbManager.editSetNameByName(newName, old_name);
                         refreshExListView();
+                        break;
+                    case SUBMIT_SET_TO_MAIN_VIEW:
+                        // dbManager.editSetNameByName(newName, old_name);
+                        clearAllListData();
+                        applySetToMain(setName);
+                        titleOnMainTV.setText(setName);
+                        //  refreshExListView();
                         break;
                 }
             }
@@ -523,6 +475,11 @@ public class MainActivity extends AppCompatActivity {
         for (String title : titleList) {
             dbManager.insert(title, 0, new Date(), "default");
         }
+    }
+
+    public void applySetToMain(String setName) {
+        dbManager.insertSetMain(setName);
+        setTodayData();
     }
 
     public void onAddNewItem(View view) {
