@@ -50,7 +50,6 @@ public class DBManager {
 
     //select * from main where _date between '2022-12-27' and  '2023-01-13' ;
     public Cursor selectByDate(Date date) {
-        //SELECT * from main where _date = date('now', '-1 days');
         String[] columns = new String[]{DBHelper._ID, DBHelper.TITLE, DBHelper.COUNT, DBHelper.DATE, DBHelper.DESC};
         Cursor cursor = database.query(DBHelper.MAIN_TABLE_NAME, columns, String.format("_date = '%s'", dateFormat.format(date)), null, null, null, null);
         if (cursor != null) {
@@ -83,6 +82,7 @@ public class DBManager {
 
     public int updateCounter(String title, int count, Date date, String desc) {
         //UPDATE main SET counter = (counter + 5) WHERE _date = '2022-12-25' AND title = 'PushUp' ;
+
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.COUNT, ("(" + DBHelper.COUNT + " + " + count + ")"));
         contentValues.put(DBHelper.DESC, desc);
@@ -125,7 +125,14 @@ public class DBManager {
         contentValue.put(DBHelper.SET_NAME, set_name);
         contentValue.put(DBHelper.STATUS, status);
         long res = database.insert(DBHelper.SETS_TABLE_NAME, null, contentValue);
-        return (res >= 0) ? true : false;
+
+//        SQLiteStatement stmt = database.compileStatement("INSERT INTO sets (set_name, status) VALUES (?, ?)");
+//        stmt.bindString(1, set_name);
+//        stmt.bindLong(2, status);
+//
+//
+//        long rowId = stmt.executeInsert();
+        return res >= 0;
     }
 
     public void insertNewExToSetRaw(String set_name, String ex_name, String ex_descr, int status) {
@@ -154,7 +161,8 @@ public class DBManager {
     public Cursor selectExs(String set_name) {
         String[] columns = new String[]{"ex_name", "description"};
         //SELECT sets.set_name, exercise.ex_name, 0, exercise.description, datetime(), sets.id FROM exercise INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = "Back3"
-        Cursor cursor = database.rawQuery("SELECT exercise.ex_name, exercise.description FROM exercise INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = '" + set_name + "'", null);
+        String strSQL = "SELECT exercise.ex_name, exercise.description FROM exercise INNER JOIN sets on exercise.set_id = sets.id WHERE sets.set_name = '" + set_name + "'";
+        Cursor cursor = database.rawQuery(strSQL, null);
         if (cursor != null) {
             // cursor.moveToFirst();
         }
@@ -216,4 +224,5 @@ DELETE from sets WHERE set_name = 'Biceps';
                 "SELECT ex_name as title, 0, description, date() from exercise where set_id = (SELECT id from sets where set_name='%s')", setName);
         database.execSQL(editExSql);
     }
+
 }

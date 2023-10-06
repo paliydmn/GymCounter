@@ -26,11 +26,10 @@ import static com.paliy.gymcounter_test_04.OnClickActions.SUBMIT_SET_TO_MAIN_VIE
 public class ExpListAdapter extends BaseExpandableListAdapter implements AdapterOnClickHandler {
 
     private final Context context;
+    InputMethodManager imm;// = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
     private List<String> _listDataHeader;
     private HashMap<String, List<String>> _listDataChild;
-
     private AdapterOnClickHandler handler;
-    InputMethodManager imm;// = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
     public ExpListAdapter(Context context, List<String> expandableListTitle,
                           HashMap<String, List<String>> _listDataChild) {

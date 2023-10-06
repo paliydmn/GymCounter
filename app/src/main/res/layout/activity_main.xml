@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:text="+"
+                android:text="@string/plus_symbol"
                 android:textColor="#FFFFFF"
                 android:textSize="36sp"
                 android:textStyle="bold"
@@ -99,7 +99,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="25 December 2022"
         android:textColor="#F8F1F1"
         android:textSize="30sp"
 
@@ -122,7 +121,7 @@
         app:layout_constraintStart_toEndOf="@+id/tvDate"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/abc_vector_test"
-        android:contentDescription="TODO" />
+        android:contentDescription="@string/after_date" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addNewItemFABtn"
@@ -140,7 +139,7 @@
         app:layout_constraintHorizontal_bias="0.977"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@android:drawable/ic_input_add"
-        android:contentDescription="TODO" />
+        android:contentDescription="@string/create_new_exercise_floating_button" />
 
     <ImageButton
         android:id="@+id/btnLeftDate"
@@ -155,7 +154,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/abc_vector_test"
-        android:contentDescription="TODO" />
+        android:contentDescription="@string/before_date" />
 
     <TextView
         android:id="@+id/titleOnMainTV"

@@ -32,7 +32,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + MAIN_TABLE_NAME + "(" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + TITLE + " TEXT NOT NULL, "
             + COUNT + " INTEGER, "
-         //   + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            //   + DATE + " INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, "
             + DATE + " INTEGER NOT NULL, "
             + DESC + " TEXT);";
 
@@ -50,7 +50,7 @@ public class DBHelper extends SQLiteOpenHelper {
             "'set_name' TEXT NOT NULL UNIQUE," +
             "'status' INTEGER)";
 
-    public DBHelper (Context context) {
+    public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 

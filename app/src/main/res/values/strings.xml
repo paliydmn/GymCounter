@@ -37,6 +37,16 @@
     <string name="set">Set</string>
     <string name="sets">Sets</string>
     <string name="set_name">set name</string>
+    <string name="create_new_exercise_floating_button">Create new Exercise</string>
+    <string name="before_date">Before date</string>
+    <string name="after_date">TODO</string>
+    <string name="plus_symbol">+</string>
+    <string name="edit_set_name">Edit Set Name</string>
+    <string name="apply_changes">Apply Changes</string>
+    <string name="delete_set">Delete Set</string>
+    <string name="new_exercise">New Exercise</string>
+    <string name="exercise_name">Exercise Name</string>
+    <string name="new_set">New SET</string>
 
 
 </resources>

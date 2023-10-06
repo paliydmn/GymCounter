@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,10 +48,26 @@ public class MainActivity extends AppCompatActivity {
     private static final SimpleDateFormat TITLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy");
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
-    private int lastExpandedPosition = -1;
-    NavigationView navigationView;
-    RecyclerView recyclerView;
+    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
+        return true;
+    };
+    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
+        // group collapse at groupPosition
+        System.out.println("OnGroupCollapseListener");
+    };
+    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
 
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                                    int groupPosition, long id) {
+            System.out.println("OnGroupClickListener");
+            return false;
+        }
+    };
+    private NavigationView navigationView;
+    private RecyclerView recyclerView;
+    private int lastExpandedPosition = -1;
     private List<String> titleList;
     private List<String> countList;
     private TextView dateTitleTV;
@@ -66,6 +83,14 @@ public class MainActivity extends AppCompatActivity {
     private Date dateOnTitleTV;
     private Adapter mViewHolderAdapter;
     private ExpandableListView expandableListView;
+    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
+        // group expand at groupPosition
+        if ((lastExpandedPosition != -1) && (groupPosition != lastExpandedPosition)) {
+            expandableListView.collapseGroup(lastExpandedPosition);
+        }
+        lastExpandedPosition = groupPosition;
+        System.out.println("OnGroupExpandListener");
+    };
     private ExpListAdapter expandableListAdapter;
     private List<String> expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
@@ -80,15 +105,18 @@ public class MainActivity extends AppCompatActivity {
             builder.setView(dialogView)
                     .setPositiveButton("Add", (dialog, id) -> {
                         EditText set_name = dialogView.findViewById(R.id.setNameEdText);
+                        String setNameStr = set_name.getText().toString();
                         //#ToDo check is empty, check if exists - do not create
-                        if (!set_name.getText().toString().isEmpty()) {
-                            dbManager.insertNewSet(set_name.getText().toString(), 0);
-                            //#Todo If insert success refresh expandableListView
-                            //expandableListAdapter.setNewItems();
-                            refreshExListView();
+                        if (!setNameStr.isEmpty() && !hasSpecialSym(setNameStr)) {
+                            if (dbManager.insertNewSet(setNameStr, 0)) {
+                                refreshExListView();
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Set Name should be Unique! \n Not Created!", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Toast.makeText(getApplicationContext(),
-                                    "Set Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                                    "Set Name can't be Empty or Contain Special Symbols! \n Not Created!", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .setNegativeButton("Cancel", (dialog, id) -> {
@@ -104,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
         cal.add(Calendar.DATE, i);
         return cal;
     }
-
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -151,65 +178,7 @@ public class MainActivity extends AppCompatActivity {
         expandableListView.setOnGroupCollapseListener(myOnGroupCollapseListener);
         expandableListView.setOnGroupExpandListener(myOnGroupExpandListener);
 
-        expandableListAdapter.setOnClickHandler(new AdapterOnClickHandler() {
-            @Override
-            public void onClick(OnClickActions action, String setName, String newName, String old_name) {
-                System.out.println(action);
-                System.out.println("Here! ->" + setName + " -> " + newName);
-                switch (action) {
-                    case DELETE_EXERCISE:
-                        dbManager.deleteExByExNameSetName(newName, setName);
-                        refreshExListView();
-                        break;
-                    case EDIT_EXERCISE:
-                        dbManager.editExByExNameSetName(newName, setName, old_name);
-                        refreshExListView();
-                        break;
-                    case CREATE_EXERCISE:
-                        //Add New Ex to current SET
-                        AlertDialog.Builder builder = new AlertDialog.Builder(navigationView.getContext());
-                        LayoutInflater inflater = getLayoutInflater();
-                        final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
-                        // Pass null as the parent view because its going in the dialog layout
-                        builder.setView(dialogView)
-                                .setPositiveButton("Add", (dialog, id1) -> {
-                                    EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
-                                    EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
-                                    //#ToDo check is empty, check if exists - do not create
-                                    if (!ex_name.getText().toString().isEmpty()) {
-                                        System.out.println("ADD NEW Ex!");
-                                        dbManager.insertNewExToSetRaw(setName, ex_name.getText().toString(), ex_descr.getText().toString(), 0);
-                                        refreshExListView();
-                                        //#Todo If insert success refresh expandableListView
-                                        refreshExListView();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(),
-                                                "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
-                                    }
-                                })
-                                .setNegativeButton("Cancel", (dialog, id1) -> {
-                                });
-                        builder.create();
-                        builder.show();
-                        break;
-                    case DELETE_SET:
-                        dbManager.deleteSetByName(setName);
-                        refreshExListView();
-                        break;
-                    case EDIT_SET:
-                        dbManager.editSetNameByName(newName, old_name);
-                        refreshExListView();
-                        break;
-                    case SUBMIT_SET_TO_MAIN_VIEW:
-                        // dbManager.editSetNameByName(newName, old_name);
-                        clearAllListData();
-                        applySetToMain(setName);
-                        titleOnMainTV.setText(setName);
-                        //  refreshExListView();
-                        break;
-                }
-            }
-        });
+        expandableListAdapter.setOnClickHandler(this::mOnClickExpListListener);
 
         mViewHolderAdapter = new Adapter(this, titleList, countList, listener);
 
@@ -406,8 +375,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initLists(Cursor cursor) {
-        titleList.add(cursor.getString(cursor.getColumnIndex("title")));
-        countList.add(cursor.getString(cursor.getColumnIndex("counter")));
+        String _title = cursor.getString(cursor.getColumnIndex("title"));
+        String _counter = cursor.getString(cursor.getColumnIndex("counter"));
+        if (!titleList.contains(_title)) {
+            titleList.add(_title);
+            countList.add(_counter);
+        }
     }
 
     public boolean initTodayData() {
@@ -458,6 +431,7 @@ public class MainActivity extends AppCompatActivity {
         setTodayData();
     }
 
+    //Click on Floating button. Add new exercise
     public void onAddNewItem(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
         LayoutInflater inflater = getLayoutInflater();
@@ -471,13 +445,13 @@ public class MainActivity extends AppCompatActivity {
                     String newTitle = newExTitle.getText().toString();
                     String newDesc = newExDesc.getText().toString();
                     //#ToDo check is empty, check if exists - do not create
-                    if (!newTitle.isEmpty()) {
+                    if (!newTitle.isEmpty() && !titleList.contains(newTitle) && !hasSpecialSym(newTitle) && !hasSpecialSym(newDesc)) {
                         dbManager.insert(newTitle, 0, new Date(), newDesc);
                         titleList.add(newTitle);
                         countList.add("0");
                     } else {
                         Toast.makeText(getApplicationContext(),
-                                "Title can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                                "Title can't be Empty, contain Special Symbols Or it is already exists! \n Not Created!", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, id) -> {
@@ -490,37 +464,6 @@ public class MainActivity extends AppCompatActivity {
         dateTitleTV.setText(TITLE_DATE_FORMAT.format(foDate));
     }
 
-    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
-        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
-
-//        Toast.makeText(v.getContext(), "onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition),  Toast.LENGTH_SHORT).show();
-//        System.out.println("onChildClick: " + parent.getExpandableListAdapter().getChild(groupPosition, childPosition) + " From: " + parent.getAdapter().getItem(groupPosition));
-
-        return true;
-    };
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
-        // group collapse at groupPosition
-        System.out.println("OnGroupCollapseListener");
-    };
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
-        // group expand at groupPosition
-        if ((lastExpandedPosition != -1) && (groupPosition != lastExpandedPosition)) {
-            expandableListView.collapseGroup(lastExpandedPosition);
-        }
-        lastExpandedPosition = groupPosition;
-        System.out.println("OnGroupExpandListener");
-    };
-    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
-
-        @RequiresApi(api = Build.VERSION_CODES.Q)
-        @Override
-        public boolean onGroupClick(ExpandableListView parent, View v,
-                                    int groupPosition, long id) {
-            System.out.println("OnGroupClickListener");
-            return false;
-        }
-    };
-
     public void onOpenChartsView(View view) {
         Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);
         Calendar cal = Calendar.getInstance();
@@ -528,5 +471,66 @@ public class MainActivity extends AppCompatActivity {
         cal.setTime(dateOnTitleTV);// all done
         ChartsActivityIntent.putExtra("dateRange", cal.toString()); //Optional parameters
         MainActivity.this.startActivity(ChartsActivityIntent);
+    }
+
+    private void mOnClickExpListListener(OnClickActions action, String setName, String newName, String old_name) {
+        System.out.println(action);
+        System.out.println("Here! ->" + setName + " -> " + newName);
+        switch (action) {
+            case DELETE_EXERCISE:
+                dbManager.deleteExByExNameSetName(newName, setName);
+                refreshExListView();
+                break;
+            case EDIT_EXERCISE:
+                dbManager.editExByExNameSetName(newName, setName, old_name);
+                refreshExListView();
+                break;
+            case CREATE_EXERCISE:
+                //Add New Ex to current SET
+                AlertDialog.Builder builder = new AlertDialog.Builder(navigationView.getContext());
+                LayoutInflater inflater = getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.new_exersice_form, null);
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(dialogView)
+                        .setPositiveButton("Add", (dialog, id1) -> {
+                            EditText ex_name = dialogView.findViewById(R.id.exNameEditT);
+                            EditText ex_descr = dialogView.findViewById(R.id.exDescrEditT);
+                            //#ToDo check is empty, check if exists - do not create
+                            String exNameStr = ex_name.getText().toString();
+                            String exDescStr = ex_descr.getText().toString();
+                            if (!exNameStr.isEmpty() && !hasSpecialSym(exNameStr) && !hasSpecialSym(exDescStr)) {
+                                System.out.println("ADD NEW Ex!");
+                                dbManager.insertNewExToSetRaw(setName, exNameStr, exDescStr, 0);
+                                //#Todo If insert success refresh expandableListView
+                                refreshExListView();
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Exercise Name can't be Empty! \n Not Created!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton("Cancel", (dialog, id1) -> {
+                        });
+                builder.create();
+                builder.show();
+                break;
+            case DELETE_SET:
+                dbManager.deleteSetByName(setName);
+                refreshExListView();
+                break;
+            case EDIT_SET:
+                dbManager.editSetNameByName(newName, old_name);
+                refreshExListView();
+                break;
+            case SUBMIT_SET_TO_MAIN_VIEW:
+                clearAllListData();
+                applySetToMain(setName);
+                titleOnMainTV.setText(setName);
+                //  refreshExListView();
+                break;
+        }
+    }
+
+    public boolean hasSpecialSym(String checkStr) {
+        return Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE).matcher(checkStr).find();
     }
 }

@@ -133,9 +133,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             final Dialog d = new Dialog(this.countTV.getContext());
             d.setTitle("NumberPicker");
             d.setContentView(R.layout.num_picker_dialog);
-            Button b1 = (Button) d.findViewById(R.id.button1);
-            Button b2 = (Button) d.findViewById(R.id.button2);
-            NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
+            Button b1 = d.findViewById(R.id.button1);
+            Button b2 = d.findViewById(R.id.button2);
+            NumberPicker np = d.findViewById(R.id.numberPicker1);
             np.setTextColor(Color.WHITE);
             np.setTextSize(80);
             np.setMaxValue(1000);

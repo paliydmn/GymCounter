@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="New Exercise"
+        android:text="@string/new_exercise"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,8 +21,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:autofillHints="@string/exercise_name_hint"
         android:ems="10"
-        android:hint="Exercise Description"
+        android:hint="@string/exercise_name_hint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -35,10 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
-        android:hint="Exercise Name"
+        android:hint="@string/exercise_description_hint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exNameEditT" />
+        app:layout_constraintTop_toBottomOf="@+id/exNameEditT"
+        android:importantForAutofill="no" />
 </androidx.constraintlayout.widget.ConstraintLayout>

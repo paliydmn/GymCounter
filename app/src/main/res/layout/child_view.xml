@@ -14,21 +14,21 @@
         android:id="@+id/editTextChild"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="16dp"
-        android:text="Some text Ex here"
+        android:inputType="text"
         android:textColor="@android:color/white"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
 
     <TextView
         android:id="@+id/textChild"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="16dp"
-        android:text="Some text Ex here"
         android:textColor="@android:color/white"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
