@@ -91,7 +91,7 @@ public class DBManager {
         return i;
     }
 
-    public boolean updateAddCounterRaw(String title, int count, Date date, String desc) {
+    public boolean updateAddCounterRaw(String title, int count, Date date) {
         String strSQL = "UPDATE main SET counter = (counter + " + count + ") WHERE _date = '" + dateFormat.format(date) + "' AND title = '" + title + "'";
         database.execSQL(strSQL);
         return true;

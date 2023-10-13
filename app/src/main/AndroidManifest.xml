@@ -23,7 +23,7 @@
                app to run.
         -->
         <activity
-            android:name=".MainActivity2"
+            android:name=".CardActivity"
             android:label="@string/title_activity_main2"
             android:theme="@style/Theme.GymCounter_test_04.NoActionBar" />
         <activity android:name=".MainActivity">

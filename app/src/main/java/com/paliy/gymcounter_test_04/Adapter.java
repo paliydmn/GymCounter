@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
@@ -43,12 +44,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     LayoutInflater inflater;
     View.OnClickListener listener;
     View mainView;
+    FragmentManager fragmentManager;
 
-    public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener) {
+    public Adapter(Context ctx, List<String> title, List<String> count, View.OnClickListener listener, FragmentManager fragmentManager) {
         this.listener = listener;
         this.countList = count;
         this.titleList = title;
         this.inflater = LayoutInflater.from(ctx);
+        this.fragmentManager = fragmentManager;
     }
 
     public void setCurrentViewDate(Date date) {
@@ -58,7 +61,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.activity_main2, parent, false);
+        View view = inflater.inflate(R.layout.card_item_activity, parent, false);
         mainView = view;
         return new ViewHolder(view);
     }
@@ -76,7 +79,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return titleList.size();
     }
 
-    //#ToDo seems this method is redundant
     public void changeAddBtnVisibility(ViewHolder holder) {
         if (!new Date().before(currentViewDate)) {
             holder.addBtn.setVisibility(View.GONE);
@@ -89,12 +91,15 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, NumberPicker.OnValueChangeListener {
+
+        PopUpOnClickHandler handler;
         TextView titleTV;
         TextView countTV;
         Button addBtn;
         ImageButton menuBtn;
         ConstraintLayout cardConstrLayout;
         TextView infoTV;
+        ImageButton countBtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -104,6 +109,35 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             menuBtn = itemView.findViewById(R.id.menuBtn);
             cardConstrLayout = itemView.findViewById(R.id.cardConstrLayout);
             infoTV = itemView.findViewById(R.id.infoTV);
+            countBtn = itemView.findViewById(R.id.countImBtn);
+
+            //#Todo better to rewrite that counter. current code snipped were written just for tests.
+            final PopupScreen[] popupScreen = new PopupScreen[1];
+            countBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("count click = " + titleTV.getText());
+                    popupScreen[0] = new PopupScreen();
+                    //popupScreen[0].show(fragmentManager, PopupScreen.TAG);
+                    popupScreen[0].show(fragmentManager, String.valueOf(getAdapterPosition()));
+                    popupScreen[0].setOnClickHandler(new PopUpOnClickHandler() {
+                        @Override
+                        public void onPopUpClick(OnClickActions action, int countValue) {
+                            int currentVal = Integer.parseInt(countTV.getText().toString());
+                            DBManager dbManager = new DBManager(view.getContext());
+                            try {
+                                dbManager.open();
+                                dbManager.updateAddCounterRaw((String) titleTV.getText(), countValue, currentViewDate);
+                            } catch (SQLException throwable) {
+                                throwable.printStackTrace();
+                            }
+                            dbManager.close();
+                            countTV.setText(String.valueOf(currentVal + countValue));
+                            System.out.println("Handler");
+                        }
+                    });
+                }
+            });
 
             cardConstrLayout.setOnLongClickListener(v -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -119,7 +153,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 DBManager dbManager = new DBManager(addBtn.getContext());
                 try {
                     dbManager.open();
-                    dbManager.updateAddCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate, " ");
+                    dbManager.updateAddCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate);
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
@@ -181,16 +215,15 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         public void onShowCardMenu(View view) {
             Context ctx = view.getContext();
             Dialog mDialog = new Dialog(view.getContext());
-            // Get the layout inflater
             LayoutInflater inflater = LayoutInflater.from(view.getContext());
-            // Inflate and set the layout for the dialog
             final View dialogView = inflater.inflate(R.layout.card_item_menu, null);
+
             Button deleteBtn = dialogView.findViewById(R.id.deleteBtn);
             Button editBtn = dialogView.findViewById(R.id.editTitleBtn);
             Button editApplyBtn = dialogView.findViewById(R.id.editApplyBtn);
             Button cancelBtn = dialogView.findViewById(R.id.cancelBtn);
             EditText editTitleText = dialogView.findViewById(R.id.titleEditText);
-            EditText desciptionEditText = dialogView.findViewById(R.id.desciptionEditText);
+            EditText descriptionEditText = dialogView.findViewById(R.id.desciptionEditText);
             TextView infoTV = dialogView.findViewById(R.id.infoTV);
             ImageView expandInfoImgV = dialogView.findViewById(R.id.expandInfoImgV);
             infoTV.setMovementMethod(new ScrollingMovementMethod());
@@ -226,12 +259,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 //#ToDo edit title
                 editBtn.setVisibility(View.INVISIBLE);
                 editTitleText.setVisibility(View.VISIBLE);
-                desciptionEditText.setVisibility(View.VISIBLE);
+                descriptionEditText.setVisibility(View.VISIBLE);
                 deleteBtn.setVisibility(View.INVISIBLE);
                 editApplyBtn.setVisibility(View.VISIBLE);
 
                 editTitleText.setText(mTitleTV);
-                desciptionEditText.setText(infoTV.getText());
+                descriptionEditText.setText(infoTV.getText());
 
                 editApplyBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -240,7 +273,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                         try {
                             dbManager.open();
                             String newTitle = editTitleText.getText().toString();
-                            String newDescr = desciptionEditText.getText().toString();
+                            String newDescr = descriptionEditText.getText().toString();
                             if (!titleTV.getText().equals(newTitle) || !infoTV.getText().toString().equals(newDescr)) {
                                 boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newTitle, newDescr, currentViewDate);
                                 if (res) {

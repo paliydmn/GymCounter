@@ -180,14 +180,15 @@ public class MainActivity extends AppCompatActivity {
 
         expandableListAdapter.setOnClickHandler(this::mOnClickExpListListener);
 
-        mViewHolderAdapter = new Adapter(this, titleList, countList, listener);
+        mViewHolderAdapter = new Adapter(this, titleList, countList, listener, getSupportFragmentManager());
 
         mViewHolderAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
             }
         });
-        recyclerView.setAdapter(mViewHolderAdapter);
+        //#ToDo seems this setAdapter is redundant
+//        recyclerView.setAdapter(mViewHolderAdapter);
 
         initTodayData();
         updateDateTv(new Date());
@@ -196,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(mViewHolderAdapter);
+
 
         dateTitleTV.setOnClickListener(view -> {
             new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
@@ -217,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
 
             public void onSwipeRight() {
                 //   Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
-//                onBeforeDate(dateTitleTV);
                 navigationView.animate()
                         .translationX(0)
                         .alpha(1.0f)
@@ -240,7 +241,6 @@ public class MainActivity extends AppCompatActivity {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(dateOnTitleTV);
                 updateDataForDate(cal);
-                //getDataForDate(dateOnTitleTV);
                 Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
 
             }
