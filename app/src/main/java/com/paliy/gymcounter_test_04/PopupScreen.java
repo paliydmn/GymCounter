@@ -1,5 +1,6 @@
 package com.paliy.gymcounter_test_04;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -61,16 +62,16 @@ public class PopupScreen extends DialogFragment implements SensorEventListener, 
             mSpeed = MovementSpeed.valueOf(parentView.getItemAtPosition(position).toString());
             switch (mSpeed) {
                 case FAST:
-                    UP_THRESHOLD = Amplitude.FAST_H;
-                    DOWN_THRESHOLD = Amplitude.FAST_L;
+                    UP_THRESHOLD = StaticData.FAST_H;
+                    DOWN_THRESHOLD = StaticData.FAST_L;
                     break;
                 case AVERAGE:
-                    UP_THRESHOLD = Amplitude.AVERAGE_H;
-                    DOWN_THRESHOLD = Amplitude.AVERAGE_L;
+                    UP_THRESHOLD = StaticData.AVERAGE_H;
+                    DOWN_THRESHOLD = StaticData.AVERAGE_L;
                     break;
                 case SLOW:
-                    UP_THRESHOLD = Amplitude.SLOW_H;
-                    DOWN_THRESHOLD = Amplitude.SLOW_L;
+                    UP_THRESHOLD = StaticData.SLOW_H;
+                    DOWN_THRESHOLD = StaticData.SLOW_L;
                     break;
             }
         }
@@ -90,6 +91,7 @@ public class PopupScreen extends DialogFragment implements SensorEventListener, 
             container, Bundle savedInstanceState) {
 
 
+        @SuppressLint("InflateParams")
         View v = inflater.inflate(R.layout.counting_pop_up, null);
         countTV = v.findViewById(R.id.counterTV);
         startStop = v.findViewById(R.id.startCountingBtn);
@@ -99,12 +101,7 @@ public class PopupScreen extends DialogFragment implements SensorEventListener, 
         ImageButton close = v.findViewById(R.id.closePopUpImBtn);
 
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        close.setOnClickListener(v1 -> dismiss());
 
         Spinner dropdown = v.findViewById(R.id.spinner);
         String[] items = new String[3];
@@ -112,7 +109,7 @@ public class PopupScreen extends DialogFragment implements SensorEventListener, 
         items[1] = MovementSpeed.values()[1].toString();
         items[2] = MovementSpeed.values()[2].toString();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, items);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
         dropdown.setOnItemSelectedListener(dropDownListener);
 
@@ -128,22 +125,19 @@ public class PopupScreen extends DialogFragment implements SensorEventListener, 
         startTime = System.currentTimeMillis();
 
 
-        startStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (startStop.getText().equals("START")) {
-                    startStop.setText("STOP");
-                    isRunning = true;
-                    c = 0;
-                    countTV.setText("0");
-                } else {
-                    startStop.setText("START");
-                    isRunning = false;
-                    handler.onPopUpClick(OnClickActions.EDIT_SET, Integer.valueOf(countTV.getText().toString()));
+        startStop.setOnClickListener(view -> {
+            if (startStop.getText().equals(getResources().getString(R.string.start_counting))) {
+                startStop.setText(getResources().getString(R.string.stop_counting));
+                isRunning = true;
+                c = 0;
+                countTV.setText("0");
+            } else {
+                startStop.setText(getResources().getString(R.string.start_counting));
+                isRunning = false;
+                handler.onPopUpClick(OnClickActions.EDIT_SET, Integer.parseInt(countTV.getText().toString()));
 
-                }
-                System.out.println("Start");
             }
+            System.out.println("Start");
         });
 
 

@@ -37,7 +37,6 @@ import java.util.List;
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     public static final String DESCRIPTION_FIELD = "description";
-    private final int PLUS_VALUE = 5;
     List<String> titleList;
     List<String> countList;
     Date currentViewDate;
@@ -91,8 +90,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, NumberPicker.OnValueChangeListener {
-
-        PopUpOnClickHandler handler;
+        final PopupScreen popupScreen = new PopupScreen();
         TextView titleTV;
         TextView countTV;
         Button addBtn;
@@ -100,6 +98,42 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         ConstraintLayout cardConstrLayout;
         TextView infoTV;
         ImageButton countBtn;
+        View.OnClickListener onAutoCountClick = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                System.out.println("count click = " + titleTV.getText());
+                popupScreen.show(fragmentManager, String.valueOf(getAdapterPosition()));
+                popupScreen.setOnClickHandler((action, countValue) -> {
+                    int currentVal = Integer.parseInt(countTV.getText().toString());
+                    DBManager dbManager = new DBManager(view.getContext());
+                    try {
+                        dbManager.open();
+                        dbManager.updateAddCounterRaw((String) titleTV.getText(), countValue, currentViewDate);
+                    } catch (SQLException throwable) {
+                        throwable.printStackTrace();
+                    }
+                    dbManager.close();
+                    countTV.setText(String.valueOf(currentVal + countValue));
+                    System.out.println("Handler");
+                });
+            }
+        };
+        View.OnClickListener addBtnOnClick = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.println(Log.DEBUG, "TEST", String.valueOf(getAdapterPosition()));
+                int currentVal = Integer.parseInt(countTV.getText().toString());
+                DBManager dbManager = new DBManager(addBtn.getContext());
+                try {
+                    dbManager.open();
+                    dbManager.updateAddCounterRaw((String) titleTV.getText(), StaticData.PLUS_VALUE, currentViewDate);
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
+                }
+                dbManager.close();
+                countTV.setText(String.valueOf(currentVal + StaticData.PLUS_VALUE));
+            }
+        };
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -111,55 +145,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             infoTV = itemView.findViewById(R.id.infoTV);
             countBtn = itemView.findViewById(R.id.countImBtn);
 
-            //#Todo better to rewrite that counter. current code snipped were written just for tests.
-            final PopupScreen[] popupScreen = new PopupScreen[1];
-            countBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("count click = " + titleTV.getText());
-                    popupScreen[0] = new PopupScreen();
-                    //popupScreen[0].show(fragmentManager, PopupScreen.TAG);
-                    popupScreen[0].show(fragmentManager, String.valueOf(getAdapterPosition()));
-                    popupScreen[0].setOnClickHandler(new PopUpOnClickHandler() {
-                        @Override
-                        public void onPopUpClick(OnClickActions action, int countValue) {
-                            int currentVal = Integer.parseInt(countTV.getText().toString());
-                            DBManager dbManager = new DBManager(view.getContext());
-                            try {
-                                dbManager.open();
-                                dbManager.updateAddCounterRaw((String) titleTV.getText(), countValue, currentViewDate);
-                            } catch (SQLException throwable) {
-                                throwable.printStackTrace();
-                            }
-                            dbManager.close();
-                            countTV.setText(String.valueOf(currentVal + countValue));
-                            System.out.println("Handler");
-                        }
-                    });
-                }
-            });
-
+            //#Todo better to rewrite onAutoCountClick counter. current code snipped were written just for tests.
+            countBtn.setOnClickListener(onAutoCountClick);
             cardConstrLayout.setOnLongClickListener(v -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     showNumberPicker();
                 }
-                //onShowItemMenu(v);
                 return true;
             });
             menuBtn.setOnClickListener(this::onShowCardMenu);
-            addBtn.setOnClickListener(view -> {
-                Log.println(Log.DEBUG, "TEST", String.valueOf(getAdapterPosition()));
-                int currentVal = Integer.parseInt(countTV.getText().toString());
-                DBManager dbManager = new DBManager(addBtn.getContext());
-                try {
-                    dbManager.open();
-                    dbManager.updateAddCounterRaw((String) titleTV.getText(), PLUS_VALUE, currentViewDate);
-                } catch (SQLException throwable) {
-                    throwable.printStackTrace();
-                }
-                dbManager.close();
-                countTV.setText(String.valueOf(currentVal + PLUS_VALUE));
-            });
+            addBtn.setOnClickListener(addBtnOnClick);
         }
 
         @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -177,28 +172,20 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             np.setValue(Integer.parseInt(countTV.getText().toString()));
             np.setWrapSelectorWheel(false);
             np.setOnValueChangedListener(this);
-            b1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int addToCounter = np.getValue();
-                    countTV.setText(String.valueOf(addToCounter));
-                    DBManager dbManager = new DBManager(addBtn.getContext());
-                    try {
-                        dbManager.open();
-                        dbManager.updateSetCounterRaw((String) titleTV.getText(), addToCounter, currentViewDate, " ");
-                    } catch (SQLException throwable) {
-                        throwable.printStackTrace();
-                    }
-                    dbManager.close();
-                    d.dismiss();
+            b1.setOnClickListener(v -> {
+                int addToCounter = np.getValue();
+                countTV.setText(String.valueOf(addToCounter));
+                DBManager dbManager = new DBManager(addBtn.getContext());
+                try {
+                    dbManager.open();
+                    dbManager.updateSetCounterRaw((String) titleTV.getText(), addToCounter, currentViewDate, " ");
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
                 }
+                dbManager.close();
+                d.dismiss();
             });
-            b2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    d.dismiss();
-                }
-            });
+            b2.setOnClickListener(v -> d.dismiss());
             d.show();
         }
 
@@ -242,12 +229,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 }
                 cursor.close();
                 dbManager.close();
-                infoTV.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (infoTV.getLineCount() > 2) {
-                            expandInfoImgV.setVisibility(View.VISIBLE);
-                        }
+                infoTV.post(() -> {
+                    if (infoTV.getLineCount() > 2) {
+                        expandInfoImgV.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -266,80 +250,68 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 editTitleText.setText(mTitleTV);
                 descriptionEditText.setText(infoTV.getText());
 
-                editApplyBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view1) {
-                        DBManager dbManager = new DBManager(ctx);
-                        try {
-                            dbManager.open();
-                            String newTitle = editTitleText.getText().toString();
-                            String newDescr = descriptionEditText.getText().toString();
-                            if (!titleTV.getText().equals(newTitle) || !infoTV.getText().toString().equals(newDescr)) {
-                                boolean res = dbManager.updateTitleAndDescrRaw((String) titleTV.getText(), newTitle, newDescr, currentViewDate);
-                                if (res) {
-                                    Toast.makeText(view1.getContext(), newTitle + " Edited!", Toast.LENGTH_SHORT).show();
-                                    titleTV.setText(newTitle);
-                                }
+                editApplyBtn.setOnClickListener(view11 -> {
+                    DBManager dbManager1 = new DBManager(ctx);
+                    try {
+                        dbManager1.open();
+                        String newTitle = editTitleText.getText().toString();
+                        String newDescr = descriptionEditText.getText().toString();
+                        if (!titleTV.getText().equals(newTitle) || !infoTV.getText().toString().equals(newDescr)) {
+                            boolean res = dbManager1.updateTitleAndDescrRaw((String) titleTV.getText(), newTitle, newDescr, currentViewDate);
+                            if (res) {
+                                Toast.makeText(view11.getContext(), newTitle + " Edited!", Toast.LENGTH_SHORT).show();
+                                titleTV.setText(newTitle);
                             }
-                        } catch (SQLException throwable) {
-                            throwable.printStackTrace();
                         }
-                        dbManager.close();
-                        mDialog.cancel();
+                    } catch (SQLException throwable) {
+                        throwable.printStackTrace();
                     }
+                    dbManager1.close();
+                    mDialog.cancel();
                 });
             });
 
             deleteBtn.setOnClickListener(view12 -> {
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                try {
-                                    dbManager.open();
-                                    int res = dbManager.deleteExFromMainByTitleDate((String) titleTV.getText(), currentViewDate);
-                                    if (res == 1) {
-                                        Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
-                                        titleList.remove(mTitleTV);
-                                        notifyDataSetChanged();
-                                        mDialog.cancel();
-                                    }
-                                } catch (SQLException throwable) {
-                                    throwable.printStackTrace();
+                DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            try {
+                                dbManager.open();
+                                int res = dbManager.deleteExFromMainByTitleDate((String) titleTV.getText(), currentViewDate);
+                                if (res == 1) {
+                                    Toast.makeText(view12.getContext(), mTitleTV + " Deleted!", Toast.LENGTH_SHORT).show();
+                                    titleList.remove(mTitleTV);
+                                    notifyDataSetChanged();
+                                    mDialog.cancel();
                                 }
-                                dbManager.close();
-                                break;
+                            } catch (SQLException throwable) {
+                                throwable.printStackTrace();
+                            }
+                            dbManager.close();
+                            break;
 
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                //No button clicked
-                                break;
-                        }
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
                     }
                 };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(view12.getContext());
                 builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener).show();
-
             });
 
-            expandInfoImgV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (infoTV.getMaxLines() == 2) {
-                        infoTV.setMaxLines(10);
-                        expandInfoImgV.setRotationX(0);
-                    } else {
-                        infoTV.setMaxLines(2);
-                        expandInfoImgV.setRotationX(180);
-                    }
+            expandInfoImgV.setOnClickListener(v -> {
+                if (infoTV.getMaxLines() == 2) {
+                    infoTV.setMaxLines(10);
+                    expandInfoImgV.setRotationX(0);
+                } else {
+                    infoTV.setMaxLines(2);
+                    expandInfoImgV.setRotationX(180);
                 }
             });
 
-            cancelBtn.setOnClickListener(view13 -> {
-                mDialog.cancel();
-            });
+            cancelBtn.setOnClickListener(view13 -> mDialog.cancel());
             mDialog.show();
         }
     }

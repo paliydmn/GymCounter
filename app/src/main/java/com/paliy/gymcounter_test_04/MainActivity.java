@@ -48,22 +48,14 @@ public class MainActivity extends AppCompatActivity {
     private static final SimpleDateFormat TITLE_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy");
     private static final Date TODAY = Calendar.getInstance().getTime();
     final Calendar myCalendar = Calendar.getInstance();
-    ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> {
-        return true;
-    };
-    ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
+    private final ExpandableListView.OnChildClickListener myOnChildClickListener = (parent, v, groupPosition, childPosition, id) -> true;
+    private final ExpandableListView.OnGroupCollapseListener myOnGroupCollapseListener = groupPosition -> {
         // group collapse at groupPosition
         System.out.println("OnGroupCollapseListener");
     };
-    ExpandableListView.OnGroupClickListener myOnGroupClickListener = new ExpandableListView.OnGroupClickListener() {
-
-        @RequiresApi(api = Build.VERSION_CODES.Q)
-        @Override
-        public boolean onGroupClick(ExpandableListView parent, View v,
-                                    int groupPosition, long id) {
-            System.out.println("OnGroupClickListener");
-            return false;
-        }
+    private final ExpandableListView.OnGroupClickListener myOnGroupClickListener = (parent, v, groupPosition, id) -> {
+        System.out.println("OnGroupClickListener");
+        return false;
     };
     private NavigationView navigationView;
     private RecyclerView recyclerView;
@@ -83,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private Date dateOnTitleTV;
     private Adapter mViewHolderAdapter;
     private ExpandableListView expandableListView;
-    ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
+    private final ExpandableListView.OnGroupExpandListener myOnGroupExpandListener = groupPosition -> {
         // group expand at groupPosition
         if ((lastExpandedPosition != -1) && (groupPosition != lastExpandedPosition)) {
             expandableListView.collapseGroup(lastExpandedPosition);
@@ -96,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, List<String>> expandableListDetail;
     private AdapterView.OnClickListener listener;
     private DBManager dbManager;
-    View.OnClickListener onAddNewSetListener = new View.OnClickListener() {
+    private final View.OnClickListener onAddNewSetListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
@@ -170,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         expandableListView = findViewById(R.id.exListView);
         //Init exList with data from db and update
         expandableListDetail = initExpList();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
         expandableListAdapter = new ExpListAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(myOnChildClickListener);
@@ -199,9 +191,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(mViewHolderAdapter);
 
 
-        dateTitleTV.setOnClickListener(view -> {
-            new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+        dateTitleTV.setOnClickListener(view -> new DatePickerDialog(MainActivity.this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show());
         OnSwipeTouchListener onRecyclerViewSwipeTouchListener = new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
                 //   Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
@@ -283,13 +273,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshExListView() {
         expandableListDetail = initExpList();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
         expandableListAdapter.setNewItems(expandableListTitle, expandableListDetail);
         expandableListAdapter.notifyDataSetChanged();
     }
 
     private HashMap<String, List<String>> initExpList() {
-        HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
+        HashMap<String, List<String>> expandableListDetail = new HashMap<>();
         Cursor cursor = dbManager.selectTest();
         List<String> exChildItem;
         if (cursor.getCount() >= 1) {
@@ -297,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                 String set_name = cursor.getString(cursor.getColumnIndex("set_name"));
                 System.out.println("SETS = " + set_name);
                 Cursor cursor2 = dbManager.selectExs(set_name);
-                exChildItem = new ArrayList<String>();
+                exChildItem = new ArrayList<>();
                 if (cursor2.getCount() >= 1) {
                     while (cursor2.moveToNext()) {
                         String ex_name = cursor2.getString(cursor2.getColumnIndex("ex_name"));
@@ -467,6 +457,7 @@ public class MainActivity extends AppCompatActivity {
     public void onOpenChartsView(View view) {
         Intent ChartsActivityIntent = new Intent(MainActivity.this, ChartsActivity.class);
         Calendar cal = Calendar.getInstance();
+        @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         cal.setTime(dateOnTitleTV);// all done
         ChartsActivityIntent.putExtra("dateRange", cal.toString()); //Optional parameters

@@ -47,6 +47,8 @@
     <string name="new_exercise">New Exercise</string>
     <string name="exercise_name">Exercise Name</string>
     <string name="new_set">New SET</string>
+    <string name="start_counting">START</string>
+    <string name="stop_counting">STOP</string>
 
 
 </resources>
