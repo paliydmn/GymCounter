@@ -1,4 +1,4 @@
-package com.paliy.gymcounter_test_04;
+package com.paliy.gymcounter_test_04.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,6 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.paliy.gymcounter_test_04.AdapterOnClickHandler;
+import com.paliy.gymcounter_test_04.OnClickActions;
+import com.paliy.gymcounter_test_04.R;
 
 import java.util.HashMap;
 import java.util.List;

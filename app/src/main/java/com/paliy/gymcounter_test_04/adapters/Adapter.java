@@ -1,4 +1,4 @@
-package com.paliy.gymcounter_test_04;
+package com.paliy.gymcounter_test_04.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -27,6 +27,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paliy.gymcounter_test_04.PopupScreen;
+import com.paliy.gymcounter_test_04.R;
+import com.paliy.gymcounter_test_04.StaticData;
 import com.paliy.gymcounter_test_04.dbUtils.DBManager;
 
 import java.sql.SQLException;

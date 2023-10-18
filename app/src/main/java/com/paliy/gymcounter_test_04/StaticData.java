@@ -1,6 +1,6 @@
 package com.paliy.gymcounter_test_04;
 
-class StaticData {
+public class StaticData {
     public static final float FAST_H = 7.3f;
     public static final float FAST_L = -6.5f;
     public static final float AVERAGE_H = 5.6f;
