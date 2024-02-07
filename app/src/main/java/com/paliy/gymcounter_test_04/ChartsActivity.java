@@ -41,8 +41,9 @@ public class ChartsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_charts);
 
         int lastMonthDay = getLastDayOfMonthUsingCalendar(calendar.get(Calendar.MONTH));
-        Date end = new Date(123, calendar.get(Calendar.MONTH), lastMonthDay);
-        Date start = new Date(123, calendar.get(Calendar.MONTH), 1);
+        // ToDo remove hardcode and rewrite the Deprecated API
+        Date end = new Date(calendar.get(Calendar.YEAR) -1900, calendar.get(Calendar.MONTH), lastMonthDay);
+        Date start = new Date(calendar.get(Calendar.YEAR) -1900, calendar.get(Calendar.MONTH), 1);
         stat = new Statistic(this, start, end);
         String chartTitle = stat.getDateRange();
         BarChart chart = (BarChart) findViewById(R.id.chart);
@@ -65,7 +66,6 @@ public class ChartsActivity extends AppCompatActivity {
 
     private ArrayList getDataSet() {
         ArrayList dataSets = new ArrayList();
-
 
         ArrayMap<String, Integer> map = (ArrayMap<String, Integer>) stat.getStatisticMapForDateRange();
         ArrayList valueSet1;

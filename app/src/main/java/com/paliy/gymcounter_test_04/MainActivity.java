@@ -409,8 +409,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initDefaultTitles() {
-        titleList.addAll(Arrays.asList("PushUP", "PullUP", "ABS"));
-        countList.addAll(Arrays.asList("0", "0", "0"));
+        titleList.addAll(Arrays.asList("PushUP", "PullUP", "Squats", "ABS"));
+        countList.addAll(Arrays.asList("0", "0", "0", "0"));
         for (String title : titleList) {
             dbManager.insert(title, 0, new Date(), "default");
         }

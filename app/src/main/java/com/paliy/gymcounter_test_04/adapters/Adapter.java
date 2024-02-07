@@ -117,7 +117,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     }
                     dbManager.close();
                     countTV.setText(String.valueOf(currentVal + countValue));
-                    System.out.println("Handler");
+                    System.out.println("Handler onAutoCountClick");
                 });
             }
         };
